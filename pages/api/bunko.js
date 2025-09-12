@@ -120,8 +120,11 @@ export default async function handler(req, res) {
         }
       }
       
+      console.log('hCaptcha passed, proceeding with validation...');
+      
       // 入力検証
       if (!title || !author || !content) {
+        console.log('Validation failed - missing fields:', { title: !!title, author: !!author, content: !!content });
         return res.status(400).json({ error: '必須項目を入力してください' });
       }
       
@@ -137,13 +140,23 @@ export default async function handler(req, res) {
       }
       
       // データベースに保存
-      const { rows } = await sql`
-        INSERT INTO bunko (title, author, content, ip_address)
-        VALUES (${title.trim()}, ${author.trim()}, ${content.trim()}, ${ip})
-        RETURNING *
-      `;
-      
-      return res.status(200).json(rows[0]);
+      console.log('Attempting database insert...');
+      try {
+        const { rows } = await sql`
+          INSERT INTO bunko (title, author, content, ip_address)
+          VALUES (${title.trim()}, ${author.trim()}, ${content.trim()}, ${ip})
+          RETURNING *
+        `;
+        
+        console.log('Database insert successful:', rows[0]);
+        return res.status(200).json(rows[0]);
+      } catch (dbError) {
+        console.error('Database error:', dbError);
+        return res.status(500).json({ 
+          error: 'データベースエラーが発生しました',
+          details: process.env.NODE_ENV === 'development' ? dbError.message : undefined
+        });
+      }
       
     } else {
       res.setHeader('Allow', ['GET', 'POST']);
