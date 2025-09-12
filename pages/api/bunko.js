@@ -67,32 +67,47 @@ export default async function handler(req, res) {
       }
       
       // hCaptcha検証
-      if (!captchaToken) {
-        return res.status(400).json({ error: '認証が必要です' });
-      }
-
-      try {
-        const captchaResponse = await fetch('https://hcaptcha.com/siteverify', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: new URLSearchParams({
-            secret: process.env.HCAPTCHA_SECRET_KEY || '0x0000000000000000000000000000000000000000',
-            response: captchaToken,
-            remoteip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
-          }).toString(),
-        });
-
-        const captchaResult = await captchaResponse.json();
-        
-        if (!captchaResult.success) {
-          console.log('hCaptcha verification failed:', captchaResult);
-          return res.status(400).json({ error: '認証に失敗しました' });
+      if (process.env.NODE_ENV === 'production' && process.env.HCAPTCHA_SECRET_KEY && process.env.HCAPTCHA_SECRET_KEY !== '0x0000000000000000000000000000000000000000') {
+        if (!captchaToken) {
+          return res.status(400).json({ error: '認証が必要です' });
         }
-      } catch (error) {
-        console.error('hCaptcha verification error:', error);
-        return res.status(500).json({ error: '認証エラーが発生しました' });
+
+        try {
+          const captchaResponse = await fetch('https://hcaptcha.com/siteverify', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              secret: process.env.HCAPTCHA_SECRET_KEY,
+              response: captchaToken,
+              remoteip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+            }).toString(),
+          });
+
+          const captchaResult = await captchaResponse.json();
+          
+          console.log('hCaptcha verification result:', {
+            success: captchaResult.success,
+            errorCodes: captchaResult['error-codes'],
+            hostname: captchaResult.hostname,
+            challenge_ts: captchaResult.challenge_ts,
+            hasSecretKey: !!process.env.HCAPTCHA_SECRET_KEY,
+            secretKeyLength: process.env.HCAPTCHA_SECRET_KEY?.length,
+            captchaTokenLength: captchaToken?.length
+          });
+          
+          if (!captchaResult.success) {
+            console.log('hCaptcha verification failed:', captchaResult);
+            return res.status(400).json({ 
+              error: '認証に失敗しました',
+              debug: process.env.NODE_ENV === 'development' ? captchaResult : undefined
+            });
+          }
+        } catch (error) {
+          console.error('hCaptcha verification error:', error);
+          return res.status(500).json({ error: '認証エラーが発生しました' });
+        }
       }
       
       // 入力検証
