@@ -5,17 +5,18 @@ export default async function handler(req, res) {
     // CORS制限
     const allowedOrigins = [
       'http://localhost:3000',
-      'https://your-domain.com' // 本番ドメインに変更
+      'https://bunko.ozetudo.blog',
+      /^https:\/\/.*\.vercel\.app$/
     ];
     const origin = req.headers.origin;
-    if (origin && allowedOrigins.includes(origin)) {
+    if (origin && (allowedOrigins.includes(origin) || allowedOrigins.some(allowed => allowed instanceof RegExp && allowed.test(origin)))) {
       res.setHeader('Access-Control-Allow-Origin', origin);
     }
     
     // リファラーチェック（POST時）
     if (req.method === 'POST') {
       const referer = req.headers.referer;
-      if (!referer || (!referer.includes('localhost:3000') && !referer.includes('your-domain.com'))) {
+      if (!referer || (!referer.includes('localhost:3000') && !referer.includes('.vercel.app') && !referer.includes('bunko.ozetudo.blog'))) {
         return res.status(403).json({ error: 'アクセスが拒否されました' });
       }
       
