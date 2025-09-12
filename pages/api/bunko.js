@@ -39,6 +39,16 @@ export default async function handler(req, res) {
       )
     `;
 
+    // BANユーザーテーブル作成
+    await sql`
+      CREATE TABLE IF NOT EXISTS banned_users (
+        id SERIAL PRIMARY KEY,
+        ip_address VARCHAR(45) NOT NULL UNIQUE,
+        reason TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
     if (req.method === 'GET') {
       // 文庫一覧取得
       const { rows } = await sql`
