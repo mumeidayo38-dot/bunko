@@ -43,9 +43,12 @@ export default function Post() {
       });
 
       const data = await response.json();
+      console.log('API response:', { status: response.status, data });
 
       if (!response.ok) {
-        throw new Error(data.error || '投稿に失敗しました');
+        const errorMsg = data.error || '投稿に失敗しました';
+        const details = data.details ? ` (詳細: ${data.details})` : '';
+        throw new Error(errorMsg + details);
       }
 
       showMessage('投稿が完了しました', 'success');
@@ -57,6 +60,7 @@ export default function Post() {
       }, 2000);
 
     } catch (error) {
+      console.error('Post submission error:', error);
       showMessage(error.message, 'error');
     } finally {
       setLoading(false);
