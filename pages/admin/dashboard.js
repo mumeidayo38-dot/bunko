@@ -261,23 +261,40 @@ export default function AdminDashboard() {
           paddingBottom: '1rem'
         }}>
           <h1 className={styles.title} style={{ margin: 0 }}>管理</h1>
-          <button
-            onClick={logout}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#333',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              fontSize: '0.9em',
-              transition: 'background 0.3s'
-            }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#555'}
-            onMouseOut={(e) => e.target.style.backgroundColor = '#333'}
-          >
-            ログアウト
-          </button>
+          <div>
+            <button
+              onClick={() => router.push('/admin/updates')}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#666',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                fontSize: '0.9em',
+                marginRight: '10px'
+              }}
+            >
+              アップデート管理
+            </button>
+            <button
+              onClick={logout}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#333',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                fontSize: '0.9em',
+                transition: 'background 0.3s'
+              }}
+              onMouseOver={(e) => e.target.style.backgroundColor = '#555'}
+              onMouseOut={(e) => e.target.style.backgroundColor = '#333'}
+            >
+              ログアウト
+            </button>
+          </div>
         </header>
 
         {/* タブナビゲーション */}
