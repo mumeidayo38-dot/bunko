@@ -35,7 +35,7 @@ export default async function handler(req, res) {
 
 今後も機能追加を予定していますので、お楽しみに！', NOW()),
         ('検索機能を追加しました', '作者名、タイトル、本文での検索機能を追加しました。
-トップページの検索ボックスから利用できます。', NOW() - INTERVAL ''1 day'')
+トップページの検索ボックスから利用できます。', NOW() - INTERVAL '1 day')
       `;
     }
 
