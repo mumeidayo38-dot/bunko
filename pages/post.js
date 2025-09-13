@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import ReCAPTCHA from 'react-google-recaptcha';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 import styles from '../styles/Home.module.css';
 
 export default function Post() {
@@ -91,7 +91,7 @@ export default function Post() {
   return (
     <>
       <Head>
-        <title>投稿 - 文庫</title>
+        <title>投稿 - おぜう文庫 web</title>
       </Head>
       <div className={styles.container}>
         <h1 className={styles.title}>投稿</h1>
@@ -146,9 +146,11 @@ export default function Post() {
 
             <div className={styles.formGroup}>
               <label>認証</label>
-              <ReCAPTCHA
-                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"}
-                onChange={(token) => setCaptchaToken(token || '')}
+              <HCaptcha
+                sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY || "10000000-ffff-ffff-ffff-000000000001"}
+                onVerify={(token) => setCaptchaToken(token)}
+                onExpire={() => setCaptchaToken('')}
+                onError={() => setCaptchaToken('')}
               />
             </div>
             
