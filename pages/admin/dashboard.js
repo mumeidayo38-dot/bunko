@@ -234,6 +234,33 @@ export default function AdminDashboard() {
     }
   };
 
+  const toggleComments = async (bunkoId, enableComments) => {
+    try {
+      const response = await fetch('/api/admin/toggle-comments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bunko_id: bunkoId,
+          comments_enabled: enableComments
+        }),
+      });
+
+      if (response.ok) {
+        // メッセージリストを更新
+        fetchMessages();
+        alert(`コメントを${enableComments ? '有効' : '無効'}にしました`);
+      } else {
+        const data = await response.json();
+        alert(data.error || 'コメント設定の変更に失敗しました');
+      }
+    } catch (error) {
+      console.error('Error toggling comments:', error);
+      alert('ネットワークエラーが発生しました');
+    }
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('ja-JP');
   };
@@ -380,9 +407,30 @@ export default function AdminDashboard() {
                               IP: {message.ip_address}
                             </span>
                           )}
+                          <span style={{ 
+                            marginLeft: '10px', 
+                            fontSize: '0.8em',
+                            color: message.comments_enabled ? '#28a745' : '#dc3545'
+                          }}>
+                            コメント: {message.comments_enabled ? '有効' : '無効'}
+                          </span>
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '5px', flexShrink: 0, marginLeft: '15px' }}>
+                        <button
+                          onClick={() => toggleComments(message.id, !message.comments_enabled)}
+                          style={{
+                            padding: '4px 8px',
+                            backgroundColor: message.comments_enabled ? '#dc3545' : '#28a745',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '3px',
+                            cursor: 'pointer',
+                            fontSize: '0.75em'
+                          }}
+                        >
+                          {message.comments_enabled ? 'コメント無効' : 'コメント有効'}
+                        </button>
                         {message.ip_address && (
                           <button
                             onClick={() => setBanForm({...banForm, ip: message.ip_address})}
