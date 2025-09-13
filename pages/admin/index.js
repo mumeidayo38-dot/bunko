@@ -1,16 +1,23 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 import styles from '../../styles/Home.module.css';
 
 export default function AdminLogin() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState('');
   const router = useRouter();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (!captchaToken) {
+      setError('認証を完了してください');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -20,7 +27,7 @@ export default function AdminLogin() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ password, captchaToken }),
       });
 
       const data = await response.json();
@@ -30,10 +37,12 @@ export default function AdminLogin() {
         router.push('/admin/dashboard');
       } else {
         setError(data.error || 'ログインに失敗しました');
+        setCaptchaToken(''); // 失敗時にCaptchaをリセット
       }
     } catch (error) {
       console.error('Login error:', error);
       setError('ネットワークエラーが発生しました');
+      setCaptchaToken(''); // エラー時にCaptchaをリセット
     } finally {
       setLoading(false);
     }
@@ -42,7 +51,7 @@ export default function AdminLogin() {
   return (
     <>
       <Head>
-        <title>管理 - 文庫</title>
+        <title>管理 - おぜう文庫 web</title>
       </Head>
       <div className={styles.container}>
         <h1 className={styles.title}>管理</h1>
@@ -60,6 +69,16 @@ export default function AdminLogin() {
               />
             </div>
             
+            <div className={styles.formGroup}>
+              <label>認証</label>
+              <HCaptcha
+                sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY || "10000000-ffff-ffff-ffff-000000000001"}
+                onVerify={(token) => setCaptchaToken(token)}
+                onExpire={() => setCaptchaToken('')}
+                onError={() => setCaptchaToken('')}
+              />
+            </div>
+            
             {error && (
               <div className={`${styles.message} ${styles.error}`}>
                 {error}
@@ -69,7 +88,7 @@ export default function AdminLogin() {
             <button
               type="submit"
               className={styles.submitBtn}
-              disabled={loading}
+              disabled={loading || !captchaToken}
             >
               {loading ? 'ログイン中...' : 'ログイン'}
             </button>
