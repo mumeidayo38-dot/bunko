@@ -36,9 +36,17 @@ export default async function handler(req, res) {
         author TEXT NOT NULL,
         content TEXT NOT NULL,
         ip_address VARCHAR(45),
+        comments_enabled BOOLEAN DEFAULT TRUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
+
+    // 既存のレコードにcomments_enabledカラムがない場合は追加
+    try {
+      await sql`ALTER TABLE bunko ADD COLUMN IF NOT EXISTS comments_enabled BOOLEAN DEFAULT TRUE`;
+    } catch (e) {
+      // カラムが既に存在する場合のエラーは無視
+    }
 
     // BANユーザーテーブル作成
     await sql`
@@ -53,7 +61,7 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       // 文庫一覧取得
       const { rows } = await sql`
-        SELECT id, title, author, content, ip_address, created_at FROM bunko 
+        SELECT id, title, author, content, ip_address, comments_enabled, created_at FROM bunko 
         ORDER BY created_at DESC
         LIMIT 100
       `;
@@ -67,7 +75,7 @@ export default async function handler(req, res) {
         headers: req.headers,
         contentType: req.headers['content-type']
       });
-      const { title, author, content, captchaToken } = req.body;
+      const { title, author, content, captchaToken, commentsEnabled } = req.body;
       const ip = getClientIP(req);
 
       // BANチェック
@@ -161,8 +169,8 @@ export default async function handler(req, res) {
       console.log('Attempting database insert...');
       try {
         const { rows } = await sql`
-          INSERT INTO bunko (title, author, content, ip_address)
-          VALUES (${title.trim()}, ${author.trim()}, ${content.trim()}, ${ip})
+          INSERT INTO bunko (title, author, content, ip_address, comments_enabled)
+          VALUES (${title.trim()}, ${author.trim()}, ${content.trim()}, ${ip}, ${commentsEnabled !== false})
           RETURNING *
         `;
         
