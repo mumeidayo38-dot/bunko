@@ -249,7 +249,7 @@ export default function AdminDashboard() {
   return (
     <>
       <Head>
-        <title>管理 - 文庫</title>
+        <title>管理 - おぜう文庫 web</title>
       </Head>
       <div className={styles.container}>
         <header style={{ 
