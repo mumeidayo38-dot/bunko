@@ -61,6 +61,11 @@ export default async function handler(req, res) {
       
     } else if (req.method === 'POST') {
       // 文庫投稿
+      console.log('Received POST request:', {
+        body: req.body,
+        headers: req.headers,
+        contentType: req.headers['content-type']
+      });
       const { title, author, content, captchaToken } = req.body;
       const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown';
 
