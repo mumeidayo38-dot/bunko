@@ -6,6 +6,34 @@
   min-height: 100vh;
 }
 
+.header {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.updateButton {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: #333;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 0.85em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+.updateButton:hover {
+  background: #555;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
 .title {
   text-align: center;
   margin: 30px 0;
@@ -334,10 +362,51 @@
   font-size: 1em;
 }
 
+.updatesList {
+  margin-top: 40px;
+}
+
+.updateItem {
+  background: #f8f9fa;
+  padding: 20px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #333;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.updateDate {
+  color: #666;
+  font-size: 0.9em;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.updateTitle {
+  font-size: 1.2em;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.updateContent {
+  color: #555;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  font-size: 0.95em;
+}
+
 /* レスポンシブ対応 */
 @media (max-width: 768px) {
   .container {
     padding: 15px;
+  }
+  
+  .updateButton {
+    font-size: 0.8em;
+    padding: 6px 12px;
+    top: 15px;
+    left: 15px;
   }
   
   .title {
