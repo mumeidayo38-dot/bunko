@@ -5,12 +5,14 @@ import styles from '../styles/Home.module.css';
 
 export default function Home() {
   const [bunkoList, setBunkoList] = useState([]);
+  const [filteredBunkoList, setFilteredBunkoList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedBunko, setSelectedBunko] = useState(null);
   const [comments, setComments] = useState([]);
   const [likes, setLikes] = useState({ count: 0, liked: false });
   const [commentForm, setCommentForm] = useState({ author: '', content: '', captchaToken: '' });
   const [commentLoading, setCommentLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     loadBunkoList();
@@ -22,11 +24,14 @@ export default function Home() {
       const response = await fetch('/api/bunko');
       if (response.ok) {
         const data = await response.json();
-        setBunkoList(Array.isArray(data) ? data : []);
+        const bunkoData = Array.isArray(data) ? data : [];
+        setBunkoList(bunkoData);
+        setFilteredBunkoList(bunkoData);
       }
     } catch (error) {
       console.error('Error loading bunko list:', error);
       setBunkoList([]);
+      setFilteredBunkoList([]);
     } finally {
       setLoading(false);
     }
@@ -130,6 +135,22 @@ export default function Home() {
     loadLikes(bunko.id);
   };
 
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    
+    if (query.trim() === '') {
+      setFilteredBunkoList(bunkoList);
+    } else {
+      const filtered = bunkoList.filter(bunko => 
+        bunko.author.toLowerCase().includes(query.toLowerCase()) ||
+        bunko.title.toLowerCase().includes(query.toLowerCase()) ||
+        bunko.content.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredBunkoList(filtered);
+    }
+  };
+
 
   return (
     <>
@@ -156,14 +177,26 @@ export default function Home() {
           </a>
         </nav>
 
+        <div className={styles.searchContainer}>
+          <input
+            type="text"
+            placeholder="作者名、タイトル、内容で検索..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className={styles.searchInput}
+          />
+        </div>
+
         <div className={styles.homeView}>
           {loading ? (
             <div className={styles.loading}>読み込み中...</div>
-          ) : bunkoList.length === 0 ? (
-            <div className={styles.emptyState}>まだ投稿がありません</div>
+          ) : filteredBunkoList.length === 0 ? (
+            <div className={styles.emptyState}>
+              {searchQuery ? '検索結果が見つかりませんでした' : 'まだ投稿がありません'}
+            </div>
           ) : (
             <div className={styles.bunkoList}>
-              {bunkoList.map((bunko) => (
+              {filteredBunkoList.map((bunko) => (
                 <div
                   key={bunko.id}
                   className={styles.bunkoItem}
