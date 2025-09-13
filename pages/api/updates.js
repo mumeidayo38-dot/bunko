@@ -1,18 +1,4 @@
-// モックデータ（開発用）
-let mockUpdates = [
-  {
-    id: 1,
-    title: "おぜう文庫 web がオープンしました！",
-    content: "みなさん、こんにちは！\n\nついにおぜう文庫のweb版がリリースされました。\n文庫の投稿や閲覧、コメント機能などを楽しんでください。\n\n今後も機能追加を予定していますので、お楽しみに！",
-    created_at: new Date().toISOString()
-  },
-  {
-    id: 2,
-    title: "検索機能を追加しました",
-    content: "作者名、タイトル、本文での検索機能を追加しました。\nトップページの検索ボックスから利用できます。",
-    created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-  }
-];
+import { sql } from '@vercel/postgres';
 
 export default async function handler(req, res) {
   try {
@@ -27,13 +13,44 @@ export default async function handler(req, res) {
       res.setHeader('Access-Control-Allow-Origin', origin);
     }
 
+    // アップデートテーブル作成（初回のみ実行される）
+    await sql`
+      CREATE TABLE IF NOT EXISTS updates (
+        id SERIAL PRIMARY KEY,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
+    // 初期データ挿入（テーブルが空の場合のみ）
+    const existingUpdates = await sql`SELECT COUNT(*) FROM updates`;
+    if (existingUpdates.rows[0].count === '0') {
+      await sql`
+        INSERT INTO updates (title, content, created_at) VALUES 
+        ('おぜう文庫 web がオープンしました！', 'みなさん、こんにちは！
+
+ついにおぜう文庫のweb版がリリースされました。
+文庫の投稿や閲覧、コメント機能などを楽しんでください。
+
+今後も機能追加を予定していますので、お楽しみに！', NOW()),
+        ('検索機能を追加しました', '作者名、タイトル、本文での検索機能を追加しました。
+トップページの検索ボックスから利用できます。', NOW() - INTERVAL ''1 day'')
+      `;
+    }
+
     if (req.method === 'GET') {
-      // アップデート一覧取得（モックデータ）
-      const sortedUpdates = mockUpdates.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      return res.status(200).json(sortedUpdates.slice(0, 50));
+      // アップデート一覧取得
+      const { rows } = await sql`
+        SELECT id, title, content, created_at FROM updates 
+        ORDER BY created_at DESC
+        LIMIT 50
+      `;
+      
+      return res.status(200).json(rows);
       
     } else if (req.method === 'POST') {
-      // アップデート投稿（管理者のみ、モックデータ）
+      // アップデート投稿（管理者のみ）
       const { title, content } = req.body;
       
       // 入力検証
@@ -49,32 +66,49 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: '内容は2000文字以内にしてください' });
       }
       
-      // モックデータに追加
-      const newUpdate = {
-        id: Math.max(...mockUpdates.map(u => u.id), 0) + 1,
-        title: title.trim(),
-        content: content.trim(),
-        created_at: new Date().toISOString()
-      };
-      
-      mockUpdates.push(newUpdate);
-      return res.status(200).json(newUpdate);
+      // データベースに保存
+      try {
+        const { rows } = await sql`
+          INSERT INTO updates (title, content)
+          VALUES (${title.trim()}, ${content.trim()})
+          RETURNING *
+        `;
+        
+        return res.status(200).json(rows[0]);
+      } catch (dbError) {
+        console.error('Database error:', dbError);
+        return res.status(500).json({ 
+          error: 'データベースエラーが発生しました',
+          details: process.env.NODE_ENV === 'development' ? dbError.message : undefined
+        });
+      }
       
     } else if (req.method === 'DELETE') {
-      // アップデート削除（管理者のみ、モックデータ）
+      // アップデート削除（管理者のみ）
       const { id } = req.body;
       
       if (!id) {
         return res.status(400).json({ error: 'IDが必要です' });
       }
       
-      const updateIndex = mockUpdates.findIndex(u => u.id === parseInt(id));
-      if (updateIndex === -1) {
-        return res.status(404).json({ error: 'アップデートが見つかりません' });
+      try {
+        const { rows } = await sql`
+          DELETE FROM updates WHERE id = ${id}
+          RETURNING *
+        `;
+        
+        if (rows.length === 0) {
+          return res.status(404).json({ error: 'アップデートが見つかりません' });
+        }
+        
+        return res.status(200).json({ message: '削除しました' });
+      } catch (dbError) {
+        console.error('Database error:', dbError);
+        return res.status(500).json({ 
+          error: 'データベースエラーが発生しました',
+          details: process.env.NODE_ENV === 'development' ? dbError.message : undefined
+        });
       }
-      
-      mockUpdates.splice(updateIndex, 1);
-      return res.status(200).json({ message: '削除しました' });
       
     } else {
       res.setHeader('Allow', ['GET', 'POST', 'DELETE']);
