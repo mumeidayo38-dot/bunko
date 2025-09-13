@@ -162,7 +162,15 @@ export default function Home() {
       </Head>
       
       <div className={styles.container}>
-        <h1 className={styles.title}>おぜう文庫 web</h1>
+        <div className={styles.header}>
+          <button 
+            className={styles.updateButton}
+            onClick={() => window.location.href = '/updates'}
+          >
+            むめーのアップデート履歴
+          </button>
+          <h1 className={styles.title}>おぜう文庫 web</h1>
+        </div>
         
         <nav className={styles.nav}>
           <a 
@@ -174,6 +182,11 @@ export default function Home() {
             onClick={() => window.location.href = '/post'}
           >
             投稿
+          </a>
+          <a 
+            onClick={() => window.location.href = '/updates'}
+          >
+            アップデート
           </a>
         </nav>
 
