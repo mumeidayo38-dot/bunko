@@ -1,21 +1,23 @@
 import { sql } from '@vercel/postgres';
+import { getClientIP } from '../../lib/getClientIP';
 
 export default async function handler(req, res) {
   try {
     // CORS制限
     const allowedOrigins = [
       'http://localhost:3000',
-      'https://your-domain.com'
+      'https://bunko.ozetudo.blog',
+      /^https:\/\/.*\.vercel\.app$/
     ];
     const origin = req.headers.origin;
-    if (origin && allowedOrigins.includes(origin)) {
+    if (origin && (allowedOrigins.includes(origin) || allowedOrigins.some(allowed => allowed instanceof RegExp && allowed.test(origin)))) {
       res.setHeader('Access-Control-Allow-Origin', origin);
     }
 
     // リファラーチェック（POST時）
     if (req.method === 'POST') {
       const referer = req.headers.referer;
-      if (!referer || (!referer.includes('localhost:3000') && !referer.includes('your-domain.com'))) {
+      if (!referer || (!referer.includes('localhost:3000') && !referer.includes('.vercel.app') && !referer.includes('bunko.ozetudo.blog'))) {
         return res.status(403).json({ error: 'アクセスが拒否されました' });
       }
       
@@ -40,7 +42,7 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
       // コメントの投稿
       const { bunko_id, author, content, captchaToken } = req.body;
-      const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown';
+      const ip = getClientIP(req);
 
       // BANチェック
       try {
@@ -73,7 +75,7 @@ export default async function handler(req, res) {
           body: new URLSearchParams({
             secret: process.env.HCAPTCHA_SECRET_KEY || '0x0000000000000000000000000000000000000000',
             response: captchaToken,
-            remoteip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+            remoteip: getClientIP(req),
           }).toString(),
         });
 
