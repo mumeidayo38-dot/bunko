@@ -1,4 +1,5 @@
 import { sql } from '@vercel/postgres';
+import { getClientIP } from '../../lib/getClientIP';
 
 export default async function handler(req, res) {
   try {
@@ -26,7 +27,7 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
       // いいねの追加/削除
       const { bunko_id } = req.body;
-      const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown';
+      const ip = getClientIP(req);
 
       // BANチェック
       try {
@@ -92,7 +93,7 @@ export default async function handler(req, res) {
     } else if (req.method === 'GET') {
       // いいね数の取得
       const { bunko_id } = req.query;
-      const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown';
+      const ip = getClientIP(req);
 
       if (!bunko_id) {
         return res.status(400).json({ error: '文庫IDが必要です' });
