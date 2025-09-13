@@ -10,7 +10,8 @@ export default function Post() {
   const [formData, setFormData] = useState({
     title: '',
     author: '',
-    content: ''
+    content: '',
+    commentsEnabled: true
   });
   const [captchaToken, setCaptchaToken] = useState('');
   const router = useRouter();
@@ -61,7 +62,7 @@ export default function Post() {
       }
 
       showMessage('投稿が完了しました', 'success');
-      setFormData({ title: '', author: '', content: '' });
+      setFormData({ title: '', author: '', content: '', commentsEnabled: true });
       setCaptchaToken('');
       
       setTimeout(() => {
@@ -82,9 +83,10 @@ export default function Post() {
   };
 
   const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: type === 'checkbox' ? checked : value
     });
   };
 
@@ -144,6 +146,18 @@ export default function Post() {
               />
             </div>
             
+            <div className={styles.formGroup}>
+              <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  name="commentsEnabled"
+                  checked={formData.commentsEnabled}
+                  onChange={handleInputChange}
+                  style={{ marginRight: '8px', cursor: 'pointer' }}
+                />
+                コメントを有効にする
+              </label>
+            </div>
 
             <div className={styles.formGroup}>
               <label>認証</label>
