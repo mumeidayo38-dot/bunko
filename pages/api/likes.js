@@ -6,10 +6,11 @@ export default async function handler(req, res) {
     // CORS制限
     const allowedOrigins = [
       'http://localhost:3000',
-      'https://your-domain.com'
+      'https://bunko.ozetudo.blog',
+      /^https:\/\/.*\.vercel\.app$/
     ];
     const origin = req.headers.origin;
-    if (origin && allowedOrigins.includes(origin)) {
+    if (origin && (allowedOrigins.includes(origin) || allowedOrigins.some(allowed => allowed instanceof RegExp && allowed.test(origin)))) {
       res.setHeader('Access-Control-Allow-Origin', origin);
     }
 
