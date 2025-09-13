@@ -147,16 +147,59 @@ export default function Post() {
             </div>
             
             <div className={styles.formGroup}>
-              <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  name="commentsEnabled"
-                  checked={formData.commentsEnabled}
-                  onChange={handleInputChange}
-                  style={{ marginRight: '8px', cursor: 'pointer' }}
-                />
-                コメントを有効にする
-              </label>
+              <div className={styles.commentToggleWrapper}>
+                <label style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  cursor: 'pointer',
+                  padding: '12px',
+                  border: '2px solid #e0e0e0',
+                  borderRadius: '8px',
+                  backgroundColor: formData.commentsEnabled ? '#f0f8ff' : '#f9f9f9',
+                  borderColor: formData.commentsEnabled ? '#4a90e2' : '#e0e0e0',
+                  transition: 'all 0.3s'
+                }}>
+                  <div style={{
+                    position: 'relative',
+                    width: '50px',
+                    height: '28px',
+                    backgroundColor: formData.commentsEnabled ? '#4a90e2' : '#ccc',
+                    borderRadius: '14px',
+                    transition: 'background-color 0.3s',
+                    marginRight: '12px'
+                  }}>
+                    <div style={{
+                      position: 'absolute',
+                      top: '2px',
+                      left: formData.commentsEnabled ? '24px' : '2px',
+                      width: '24px',
+                      height: '24px',
+                      backgroundColor: 'white',
+                      borderRadius: '50%',
+                      transition: 'left 0.3s',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    }}></div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    name="commentsEnabled"
+                    checked={formData.commentsEnabled}
+                    onChange={handleInputChange}
+                    style={{ display: 'none' }}
+                  />
+                  <div>
+                    <div style={{ fontWeight: '500', color: '#333' }}>
+                      コメント機能
+                    </div>
+                    <div style={{ fontSize: '0.85em', color: '#666', marginTop: '2px' }}>
+                      {formData.commentsEnabled ? 
+                        '読者がコメントを投稿できます' : 
+                        'コメント投稿は無効になります'
+                      }
+                    </div>
+                  </div>
+                </label>
+              </div>
             </div>
 
             <div className={styles.formGroup}>
