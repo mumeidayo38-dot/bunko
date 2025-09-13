@@ -30,20 +30,29 @@ export default function Post() {
     
     setLoading(true);
     
+    const requestData = {
+      ...formData,
+      captchaToken
+    };
+    console.log('Sending request:', requestData);
+    
     try {
       const response = await fetch('/api/bunko', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          captchaToken
-        })
+        body: JSON.stringify(requestData)
       });
 
-      const data = await response.json();
-      console.log('API response:', { status: response.status, data });
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        console.error('Failed to parse JSON response:', e);
+        data = { error: 'サーバーエラー: レスポンスの解析に失敗しました' };
+      }
+      console.log('API response:', { status: response.status, data, url: response.url });
 
       if (!response.ok) {
         const errorMsg = data.error || '投稿に失敗しました';
