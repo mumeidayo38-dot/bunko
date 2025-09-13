@@ -42,6 +42,34 @@
   font-weight: bold;
 }
 
+.searchContainer {
+  text-align: center;
+  margin: 30px 0;
+}
+
+.searchInput {
+  width: 100%;
+  max-width: 400px;
+  padding: 12px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 25px;
+  font-size: 1em;
+  font-family: inherit;
+  transition: all 0.3s;
+  background: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #999;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+}
+
+.searchInput::placeholder {
+  color: #aaa;
+}
+
 .homeView,
 .toukouView {
   animation: fadeIn 0.3s ease-in;
