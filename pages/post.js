@@ -155,9 +155,7 @@ export default function Post() {
                   padding: '12px',
                   border: '2px solid #e0e0e0',
                   borderRadius: '8px',
-                  backgroundColor: formData.commentsEnabled ? '#f0f8ff' : '#f9f9f9',
-                  borderColor: formData.commentsEnabled ? '#4a90e2' : '#e0e0e0',
-                  transition: 'all 0.3s'
+                  backgroundColor: '#f9f9f9'
                 }}>
                   <div style={{
                     position: 'relative',
