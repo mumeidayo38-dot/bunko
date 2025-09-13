@@ -183,11 +183,6 @@ export default function Home() {
           >
             投稿
           </a>
-          <a 
-            onClick={() => window.location.href = '/updates'}
-          >
-            アップデート
-          </a>
         </nav>
 
         <div className={styles.searchContainer}>
