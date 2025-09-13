@@ -290,10 +290,11 @@ export default function Home() {
               </div>
 
               {/* コメントセクション */}
-              <div style={{ marginTop: '30px' }}>
-                <h3 style={{ marginBottom: '15px', fontSize: '1.1em' }}>
-                  コメント ({comments.length})
-                </h3>
+              {selectedBunko.comments_enabled ? (
+                <div style={{ marginTop: '30px' }}>
+                  <h3 style={{ marginBottom: '15px', fontSize: '1.1em' }}>
+                    コメント ({comments.length})
+                  </h3>
                 
                 {/* コメント一覧 */}
                 {comments.length > 0 ? (
@@ -420,7 +421,20 @@ export default function Home() {
                     {commentLoading ? '投稿中...' : 'コメント投稿'}
                   </button>
                 </form>
-              </div>
+                </div>
+              ) : (
+                <div style={{ 
+                  marginTop: '30px',
+                  textAlign: 'center',
+                  color: '#666',
+                  fontSize: '0.9em',
+                  padding: '20px',
+                  backgroundColor: '#f5f5f5',
+                  borderRadius: '8px'
+                }}>
+                  この投稿はコメントが無効になっています
+                </div>
+              )}
             </div>
           </div>
         )}
