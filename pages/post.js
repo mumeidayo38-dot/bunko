@@ -99,7 +99,6 @@ export default function Post() {
         <nav className={styles.nav}>
           <a onClick={() => router.push('/')}>ホーム</a>
           <a className={styles.active}>投稿</a>
-          <a onClick={() => router.push('/updates')}>アップデート</a>
         </nav>
 
         <div className={styles.toukouView}>
