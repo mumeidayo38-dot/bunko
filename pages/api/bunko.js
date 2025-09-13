@@ -81,13 +81,30 @@ export default async function handler(req, res) {
         console.error('Ban check error:', error);
       }
       
-      // hCaptcha検証
-      if (process.env.NODE_ENV === 'production' && process.env.HCAPTCHA_SECRET_KEY && process.env.HCAPTCHA_SECRET_KEY !== '0x0000000000000000000000000000000000000000') {
+      // hCaptcha検証 - デバッグ用スキップオプション追加
+      console.log('Captcha check:', {
+        skipCaptcha: process.env.SKIP_CAPTCHA,
+        nodeEnv: process.env.NODE_ENV,
+        hasSecret: !!process.env.HCAPTCHA_SECRET_KEY
+      });
+      
+      if (process.env.SKIP_CAPTCHA !== 'true' && process.env.NODE_ENV === 'production' && process.env.HCAPTCHA_SECRET_KEY && process.env.HCAPTCHA_SECRET_KEY !== '0x0000000000000000000000000000000000000000') {
         if (!captchaToken) {
           return res.status(400).json({ error: '認証が必要です' });
         }
 
         try {
+          const remoteIp = req.headers['x-forwarded-for'] || 
+                          req.headers['x-real-ip'] || 
+                          req.connection.remoteAddress || 
+                          '127.0.0.1';
+          
+          console.log('hCaptcha request data:', {
+            secret: process.env.HCAPTCHA_SECRET_KEY?.substring(0, 10) + '...',
+            responseLength: captchaToken?.length,
+            remoteIp: remoteIp
+          });
+          
           const captchaResponse = await fetch('https://hcaptcha.com/siteverify', {
             method: 'POST',
             headers: {
@@ -96,7 +113,7 @@ export default async function handler(req, res) {
             body: new URLSearchParams({
               secret: process.env.HCAPTCHA_SECRET_KEY,
               response: captchaToken,
-              remoteip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+              // remoteip: remoteIp, // 一時的にコメントアウト
             }).toString(),
           });
 
