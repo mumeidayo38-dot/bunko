@@ -39,6 +39,7 @@ export default function Updates() {
         <nav className={styles.nav}>
           <a onClick={() => router.push('/')}>ホーム</a>
           <a onClick={() => router.push('/post')}>投稿</a>
+          <a className={styles.active}>アップデート</a>
         </nav>
 
         <div className={styles.homeView}>
