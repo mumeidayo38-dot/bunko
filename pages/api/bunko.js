@@ -1,4 +1,5 @@
 import { sql } from '@vercel/postgres';
+import { getClientIP } from '../../lib/getClientIP';
 
 export default async function handler(req, res) {
   try {
@@ -67,7 +68,7 @@ export default async function handler(req, res) {
         contentType: req.headers['content-type']
       });
       const { title, author, content, captchaToken } = req.body;
-      const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown';
+      const ip = getClientIP(req);
 
       // BANチェック
       try {
@@ -93,10 +94,7 @@ export default async function handler(req, res) {
         }
 
         try {
-          const remoteIp = req.headers['x-forwarded-for'] || 
-                          req.headers['x-real-ip'] || 
-                          req.connection.remoteAddress || 
-                          '127.0.0.1';
+          const remoteIp = getClientIP(req);
           
           console.log('hCaptcha request data:', {
             secret: process.env.HCAPTCHA_SECRET_KEY?.substring(0, 10) + '...',
