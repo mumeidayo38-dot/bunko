@@ -134,14 +134,14 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>ozeu文庫web</title>
-        <meta name="description" content="web版のおぜう文庫" />
+        <title>おぜう文庫 web</title>
+        <meta name="description" content="おぜう文庫 web" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       
       <div className={styles.container}>
-        <h1 className={styles.title}>文庫</h1>
+        <h1 className={styles.title}>おぜう文庫 web</h1>
         
         <nav className={styles.nav}>
           <a 
@@ -227,8 +227,25 @@ export default function Home() {
                     transition: 'all 0.2s'
                   }}
                 >
-                  <span style={{ fontSize: '16px' }}>
-                    {likes.liked ? '❤️' : '🤍'}
+                  <span 
+                    style={{ 
+                      fontSize: '16px',
+                      position: 'relative',
+                      display: 'inline-block'
+                    }}
+                  >
+                    <span style={{
+                      color: '#333',
+                      fontSize: '16px'
+                    }}>♡</span>
+                    <span style={{
+                      position: 'absolute',
+                      top: '0',
+                      left: '0',
+                      color: likes.liked ? '#ff4757' : 'transparent',
+                      fontSize: '16px',
+                      transition: 'color 0.3s ease'
+                    }}>♥</span>
                   </span>
                   {likes.count}
                 </button>
