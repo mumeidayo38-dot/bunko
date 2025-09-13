@@ -81,13 +81,13 @@ export default async function handler(req, res) {
         console.error('Ban check error:', error);
       }
       
-      // reCAPTCHA検証
-      console.log('reCAPTCHA check:', {
+      // hCaptcha検証
+      console.log('hCaptcha check:', {
         nodeEnv: process.env.NODE_ENV,
-        hasSecret: !!process.env.RECAPTCHA_SECRET_KEY
+        hasSecret: !!process.env.HCAPTCHA_SECRET_KEY
       });
       
-      if (process.env.NODE_ENV === 'production' && process.env.RECAPTCHA_SECRET_KEY) {
+      if (process.env.NODE_ENV === 'production' && process.env.HCAPTCHA_SECRET_KEY && process.env.HCAPTCHA_SECRET_KEY !== '0x0000000000000000000000000000000000000000') {
         if (!captchaToken) {
           return res.status(400).json({ error: '認証が必要です' });
         }
@@ -98,19 +98,19 @@ export default async function handler(req, res) {
                           req.connection.remoteAddress || 
                           '127.0.0.1';
           
-          console.log('reCAPTCHA request data:', {
-            secret: process.env.RECAPTCHA_SECRET_KEY?.substring(0, 10) + '...',
+          console.log('hCaptcha request data:', {
+            secret: process.env.HCAPTCHA_SECRET_KEY?.substring(0, 10) + '...',
             responseLength: captchaToken?.length,
             remoteIp: remoteIp
           });
           
-          const captchaResponse = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+          const captchaResponse = await fetch('https://hcaptcha.com/siteverify', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: new URLSearchParams({
-              secret: process.env.RECAPTCHA_SECRET_KEY,
+              secret: process.env.HCAPTCHA_SECRET_KEY,
               response: captchaToken,
               remoteip: remoteIp,
             }).toString(),
@@ -118,29 +118,29 @@ export default async function handler(req, res) {
 
           const captchaResult = await captchaResponse.json();
           
-          console.log('reCAPTCHA verification result:', {
+          console.log('hCaptcha verification result:', {
             success: captchaResult.success,
             errorCodes: captchaResult['error-codes'],
             hostname: captchaResult.hostname,
             challenge_ts: captchaResult.challenge_ts,
-            hasSecretKey: !!process.env.RECAPTCHA_SECRET_KEY,
+            hasSecretKey: !!process.env.HCAPTCHA_SECRET_KEY,
             captchaTokenLength: captchaToken?.length
           });
           
           if (!captchaResult.success) {
-            console.log('reCAPTCHA verification failed:', captchaResult);
+            console.log('hCaptcha verification failed:', captchaResult);
             return res.status(400).json({ 
               error: '認証に失敗しました',
               debug: process.env.NODE_ENV === 'development' ? captchaResult : undefined
             });
           }
         } catch (error) {
-          console.error('reCAPTCHA verification error:', error);
+          console.error('hCaptcha verification error:', error);
           return res.status(500).json({ error: '認証エラーが発生しました' });
         }
       }
       
-      console.log('reCAPTCHA passed, proceeding with validation...');
+      console.log('hCaptcha passed, proceeding with validation...');
       
       // 入力検証
       if (!title || !author || !content) {
