@@ -6,11 +6,28 @@ import styles from '../styles/Home.module.css';
 export default function Updates() {
   const [updates, setUpdates] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     loadUpdates();
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+    setIsDarkMode(savedDarkMode);
+    if (savedDarkMode) {
+      document.documentElement.classList.add('dark-mode');
+    }
   }, []);
+
+  const toggleDarkMode = () => {
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    localStorage.setItem('darkMode', newDarkMode.toString());
+    if (newDarkMode) {
+      document.documentElement.classList.add('dark-mode');
+    } else {
+      document.documentElement.classList.remove('dark-mode');
+    }
+  };
 
   const loadUpdates = async () => {
     setLoading(true);
@@ -34,6 +51,13 @@ export default function Updates() {
         <title>むめーのアップデート一覧 - おぜう文庫 web</title>
       </Head>
       <div className={styles.container}>
+        <button 
+          className={styles.darkModeToggle}
+          onClick={toggleDarkMode}
+          aria-label={isDarkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
+        >
+{isDarkMode ? '☀' : '☾'}
+        </button>
         <h1 className={styles.title}>むめーのアップデート一覧</h1>
         
         <nav className={styles.nav}>
