@@ -1142,6 +1142,88 @@
   background: #5a6268;
 }
 
+.seriesItem {
+  border-left: 4px solid #4a90e2;
+}
+
+.seriesBadge {
+  background: #4a90e2;
+  color: white;
+  font-size: 0.7em;
+  padding: 2px 6px;
+  border-radius: 12px;
+  margin-left: 8px;
+  font-weight: 500;
+}
+
+.latestBadge {
+  background: #28a745;
+  color: white;
+  font-size: 0.6em;
+  padding: 1px 4px;
+  border-radius: 8px;
+  margin-left: 6px;
+  font-weight: 500;
+}
+
+.seriesDetail {
+  width: 100%;
+}
+
+.episodeList {
+  margin-top: 20px;
+}
+
+.episodeList h3 {
+  color: var(--text-color);
+  font-size: 1.1em;
+  margin-bottom: 15px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 5px;
+}
+
+.episodeItem {
+  background: var(--card-bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  transition: box-shadow 0.3s;
+}
+
+.episodeItem:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+:global(.dark-mode) .episodeItem:hover {
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+}
+
+.episodeTitle {
+  font-weight: 600;
+  font-size: 1em;
+  color: var(--text-color);
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.episodeDate {
+  font-size: 0.8em;
+  color: #999;
+  margin-bottom: 10px;
+}
+
+:global(.dark-mode) .episodeDate {
+  color: #888;
+}
+
+.episodeContent {
+  color: var(--text-color);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
 .adminPrimaryButton {
   padding: 8px 16px;
   background-color: #007bff;
