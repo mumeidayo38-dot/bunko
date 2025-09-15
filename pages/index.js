@@ -13,16 +13,32 @@ export default function Home() {
   const [commentForm, setCommentForm] = useState({ author: '', content: '', captchaToken: '' });
   const [commentLoading, setCommentLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [seriesTags, setSeriesTags] = useState([]);
+  const [selectedSeriesTag, setSelectedSeriesTag] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     loadBunkoList();
+    loadSeriesTags();
     const savedDarkMode = localStorage.getItem('darkMode') === 'true';
     setIsDarkMode(savedDarkMode);
     if (savedDarkMode) {
       document.documentElement.classList.add('dark-mode');
     }
   }, []);
+
+  const loadSeriesTags = async () => {
+    try {
+      const response = await fetch('/api/admin/series-tags');
+      if (response.ok) {
+        const data = await response.json();
+        setSeriesTags(Array.isArray(data) ? data : []);
+      }
+    } catch (error) {
+      console.error('連載タグ取得エラー:', error);
+      setSeriesTags([]);
+    }
+  };
 
   const toggleDarkMode = () => {
     const newDarkMode = !isDarkMode;
@@ -155,17 +171,35 @@ export default function Home() {
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
-    
-    if (query.trim() === '') {
-      setFilteredBunkoList(bunkoList);
-    } else {
-      const filtered = bunkoList.filter(bunko => 
+    applyFilters(query, selectedSeriesTag);
+  };
+
+  const handleSeriesTagChange = (e) => {
+    const tagId = e.target.value;
+    setSelectedSeriesTag(tagId);
+    applyFilters(searchQuery, tagId);
+  };
+
+  const applyFilters = (query, tagId) => {
+    let filtered = bunkoList;
+
+    // 連載タグでフィルター
+    if (tagId) {
+      filtered = filtered.filter(bunko => 
+        bunko.series_tag_id === parseInt(tagId)
+      );
+    }
+
+    // 検索クエリでフィルター
+    if (query.trim() !== '') {
+      filtered = filtered.filter(bunko => 
         bunko.author.toLowerCase().includes(query.toLowerCase()) ||
         bunko.title.toLowerCase().includes(query.toLowerCase()) ||
         bunko.content.toLowerCase().includes(query.toLowerCase())
       );
-      setFilteredBunkoList(filtered);
     }
+
+    setFilteredBunkoList(filtered);
   };
 
 
@@ -250,6 +284,18 @@ export default function Home() {
             onChange={handleSearchChange}
             className={styles.searchInput}
           />
+          <select
+            value={selectedSeriesTag}
+            onChange={handleSeriesTagChange}
+            className={styles.seriesTagSelect}
+          >
+            <option value="">すべての投稿</option>
+            {seriesTags.map((tag) => (
+              <option key={tag.id} value={tag.id}>
+                {tag.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className={styles.homeView}>
@@ -257,7 +303,7 @@ export default function Home() {
             <div className={styles.loading}>読み込み中...</div>
           ) : filteredBunkoList.length === 0 ? (
             <div className={styles.emptyState}>
-              {searchQuery ? '検索結果が見つかりませんでした' : 'まだ投稿がありません'}
+              {searchQuery || selectedSeriesTag ? '検索結果が見つかりませんでした' : 'まだ投稿がありません'}
             </div>
           ) : (
             <div className={styles.bunkoList}>
