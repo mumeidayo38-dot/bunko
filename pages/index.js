@@ -58,8 +58,12 @@ export default function Home() {
       if (response.ok) {
         const data = await response.json();
         const bunkoData = Array.isArray(data) ? data : [];
-        setBunkoList(bunkoData);
-        setFilteredBunkoList(bunkoData);
+        
+        // 連載作品をグループ化して最新投稿順に並び替え
+        const processedData = processBunkoData(bunkoData);
+        
+        setBunkoList(processedData);
+        setFilteredBunkoList(processedData);
       }
     } catch (error) {
       console.error('Error loading bunko list:', error);
@@ -68,6 +72,47 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const processBunkoData = (data) => {
+    const seriesMap = new Map();
+    const singlePosts = [];
+
+    // データを連載とシングル投稿に分類
+    data.forEach(bunko => {
+      if (bunko.series_tag_id) {
+        if (!seriesMap.has(bunko.series_tag_id)) {
+          seriesMap.set(bunko.series_tag_id, []);
+        }
+        seriesMap.get(bunko.series_tag_id).push(bunko);
+      } else {
+        singlePosts.push(bunko);
+      }
+    });
+
+    // 連載作品を処理（各連載の最新投稿で代表）
+    const seriesRepresentatives = [];
+    seriesMap.forEach((episodes, seriesTagId) => {
+      // 各連載の最新エピソードを取得
+      episodes.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      const latestEpisode = episodes[0];
+      
+      // 連載情報を追加
+      const seriesInfo = {
+        ...latestEpisode,
+        isSeries: true,
+        episodeCount: episodes.length,
+        allEpisodes: episodes
+      };
+      
+      seriesRepresentatives.push(seriesInfo);
+    });
+
+    // すべての投稿を最新順で結合
+    const allPosts = [...seriesRepresentatives, ...singlePosts];
+    allPosts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    return allPosts;
   };
 
   const loadComments = async (bunkoId) => {
@@ -310,13 +355,21 @@ export default function Home() {
               {filteredBunkoList.map((bunko) => (
                 <div
                   key={bunko.id}
-                  className={styles.bunkoItem}
+                  className={`${styles.bunkoItem} ${bunko.isSeries ? styles.seriesItem : ''}`}
                   onClick={() => handleBunkoClick(bunko)}
                 >
-                  <div className={styles.bunkoTitle}>{bunko.title}</div>
+                  <div className={styles.bunkoTitle}>
+                    {bunko.title}
+                    {bunko.isSeries && (
+                      <span className={styles.seriesBadge}>
+                        連載 ({bunko.episodeCount}話)
+                      </span>
+                    )}
+                  </div>
                   <div className={styles.bunkoAuthor}>作成者: {bunko.author}</div>
                   <div className={styles.bunkoPreview}>{bunko.content}</div>
                   <div className={styles.bunkoDate}>
+                    {bunko.isSeries ? '最新更新: ' : ''}
                     {new Date(bunko.created_at).toLocaleDateString('ja-JP')}
                   </div>
                 </div>
@@ -341,9 +394,38 @@ export default function Home() {
               >
                 &times;
               </span>
-              <h2 className={styles.detailTitle}>{selectedBunko.title}</h2>
-              <div className={styles.detailAuthor}>作成者: {selectedBunko.author}</div>
-              <div className={styles.detailText}>{selectedBunko.content}</div>
+              
+              {selectedBunko.isSeries ? (
+                <div className={styles.seriesDetail}>
+                  <h2 className={styles.detailTitle}>
+                    {selectedBunko.title.split(' - ')[0]}
+                    <span className={styles.seriesBadge}>連載 ({selectedBunko.episodeCount}話)</span>
+                  </h2>
+                  <div className={styles.detailAuthor}>作成者: {selectedBunko.author}</div>
+                  
+                  <div className={styles.episodeList}>
+                    <h3>エピソード一覧:</h3>
+                    {selectedBunko.allEpisodes.map((episode, index) => (
+                      <div key={episode.id} className={styles.episodeItem}>
+                        <div className={styles.episodeTitle}>
+                          {episode.title}
+                          {index === 0 && <span className={styles.latestBadge}>最新</span>}
+                        </div>
+                        <div className={styles.episodeDate}>
+                          {new Date(episode.created_at).toLocaleDateString('ja-JP')}
+                        </div>
+                        <div className={styles.episodeContent}>{episode.content}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <h2 className={styles.detailTitle}>{selectedBunko.title}</h2>
+                  <div className={styles.detailAuthor}>作成者: {selectedBunko.author}</div>
+                  <div className={styles.detailText}>{selectedBunko.content}</div>
+                </>
+              )}
               
               {/* いいねボタン */}
               <div className={styles.likeSection}>
