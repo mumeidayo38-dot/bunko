@@ -11,12 +11,7 @@ export default function Post() {
     title: '',
     author: '',
     content: '',
-    commentsEnabled: true,
-    isSeriesEnabled: false,
-    seriesName: '',
-    seriesDescription: '',
-    seriesPassword: '',
-    episodeTitle: ''
+    commentsEnabled: true
   });
   const [captchaToken, setCaptchaToken] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -44,124 +39,21 @@ export default function Post() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // 基本項目のバリデーション
-    if (!formData.author || !formData.content) {
-      showMessage('作成者と本文は必須です', 'error');
+    if (!formData.title || !formData.author || !formData.content) {
+      showMessage('すべての項目を入力してください', 'error');
       return;
-    }
-
-    // タイトル関連のバリデーション
-    if (formData.isSeriesEnabled) {
-      if (!formData.seriesName || !formData.episodeTitle) {
-        showMessage('連載タイトルと話数タイトルは必須です', 'error');
-        return;
-      }
-    } else {
-      if (!formData.title) {
-        showMessage('タイトルは必須です', 'error');
-        return;
-      }
     }
 
     if (!captchaToken) {
       showMessage('認証を完了してください', 'error');
       return;
     }
-
-    // 連載が有効な場合の処理
-    let seriesTagId = null;
-    if (formData.isSeriesEnabled) {
-      
-      try {
-        // 連載タグを作成または取得
-        const seriesResponse = await fetch('/api/admin/series-tags', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: 'create',
-            name: formData.seriesName,
-            description: formData.seriesDescription,
-            password: formData.seriesPassword
-          })
-        });
-
-        const seriesData = await seriesResponse.json();
-        if (!seriesResponse.ok) {
-          if (seriesData.error === 'このタグ名は既に存在します') {
-            // 既存の連載タグを取得してパスワード検証
-            const existingResponse = await fetch('/api/admin/series-tags?admin=true');
-            const existingTags = await existingResponse.json();
-            const existingTag = existingTags.find(tag => tag.name === formData.seriesName);
-            
-            if (existingTag) {
-              // パスワードが設定されている場合は検証
-              if (existingTag.password) {
-                if (!formData.seriesPassword) {
-                  showMessage('この連載名は既に存在します。パスワードを入力してください', 'error');
-                  return;
-                }
-                
-                // パスワード検証
-                const verifyResponse = await fetch('/api/admin/series-tags', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    action: 'verify',
-                    id: existingTag.id,
-                    password: formData.seriesPassword
-                  })
-                });
-
-                const verifyData = await verifyResponse.json();
-                if (!verifyData.verified) {
-                  showMessage('連載のパスワードが正しくありません', 'error');
-                  return;
-                }
-              } else {
-                // パスワードが設定されていない連載に新しくパスワードを設定しようとしている場合
-                if (formData.seriesPassword) {
-                  showMessage('この連載名は既に存在し、パスワードが設定されていません', 'error');
-                  return;
-                }
-              }
-              
-              seriesTagId = existingTag.id;
-            } else {
-              showMessage('連載タグの処理に失敗しました', 'error');
-              return;
-            }
-          } else {
-            showMessage(seriesData.error || '連載タグの作成に失敗しました', 'error');
-            return;
-          }
-        } else {
-          seriesTagId = seriesData.id;
-        }
-      } catch (error) {
-        console.error('連載タグ処理エラー:', error);
-        showMessage('連載タグの処理中にエラーが発生しました', 'error');
-        return;
-      }
-    }
     
     setLoading(true);
     
-    // タイトルの設定：連載の場合は「連載タイトル - 話数タイトル」、単発の場合は通常のタイトル
-    const finalTitle = formData.isSeriesEnabled 
-      ? `${formData.seriesName} - ${formData.episodeTitle}`
-      : formData.title;
-
     const requestData = {
-      title: finalTitle,
-      author: formData.author,
-      content: formData.content,
-      commentsEnabled: formData.commentsEnabled,
-      captchaToken,
-      seriesTagId
+      ...formData,
+      captchaToken
     };
     console.log('Sending request:', requestData);
     
@@ -190,17 +82,7 @@ export default function Post() {
       }
 
       showMessage('投稿が完了しました', 'success');
-      setFormData({ 
-        title: '', 
-        author: '', 
-        content: '', 
-        commentsEnabled: true, 
-        isSeriesEnabled: false,
-        seriesName: '',
-        seriesDescription: '',
-        seriesPassword: '',
-        episodeTitle: ''
-      });
+      setFormData({ title: '', author: '', content: '', commentsEnabled: true });
       setCaptchaToken('');
       
       setTimeout(() => {
@@ -268,49 +150,17 @@ export default function Post() {
             </div>
           )}
           <form onSubmit={handleSubmit}>
-            {!formData.isSeriesEnabled ? (
-              <div className={styles.formGroup}>
-                <label htmlFor="title">タイトル</label>
-                <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-            ) : (
-              <>
-                <div className={styles.formGroup}>
-                  <label htmlFor="seriesName">連載タイトル（主タイトル）*</label>
-                  <input
-                    type="text"
-                    id="seriesName"
-                    name="seriesName"
-                    value={formData.seriesName}
-                    onChange={handleInputChange}
-                    placeholder="連載の主タイトルを入力"
-                    required
-                    maxLength={100}
-                  />
-                </div>
-                
-                <div className={styles.formGroup}>
-                  <label htmlFor="episodeTitle">話数タイトル *</label>
-                  <input
-                    type="text"
-                    id="episodeTitle"
-                    name="episodeTitle"
-                    value={formData.episodeTitle}
-                    onChange={handleInputChange}
-                    placeholder="第1話、第2話などの各話タイトルを入力"
-                    required
-                    maxLength={100}
-                  />
-                </div>
-              </>
-            )}
+            <div className={styles.formGroup}>
+              <label htmlFor="title">タイトル</label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
             
             <div className={styles.formGroup}>
               <label htmlFor="author">作成者</label>
@@ -334,74 +184,6 @@ export default function Post() {
                 required
               />
             </div>
-            
-            <div className={styles.formGroup}>
-              <div className={styles.commentToggleWrapper}>
-                <label className={styles.commentToggleLabel}>
-                  <div 
-                    className={styles.commentToggleSwitch}
-                    style={{
-                      backgroundColor: formData.isSeriesEnabled ? '#4a90e2' : '#ccc'
-                    }}
-                  >
-                    <div 
-                      className={styles.commentToggleSlider}
-                      style={{
-                        left: formData.isSeriesEnabled ? '24px' : '2px'
-                      }}
-                    ></div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    name="isSeriesEnabled"
-                    checked={formData.isSeriesEnabled}
-                    onChange={handleInputChange}
-                    style={{ display: 'none' }}
-                  />
-                  <div>
-                    <div className={styles.commentToggleText}>
-                      連載機能
-                    </div>
-                    <div className={styles.commentToggleSubtext}>
-                      {formData.isSeriesEnabled ? 
-                        'この投稿を連載として投稿します' : 
-                        '単発投稿として投稿します'
-                      }
-                    </div>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            {formData.isSeriesEnabled && (
-              <>
-                <div className={styles.formGroup}>
-                  <label htmlFor="seriesDescription">連載説明（任意）</label>
-                  <textarea
-                    id="seriesDescription"
-                    name="seriesDescription"
-                    value={formData.seriesDescription}
-                    onChange={handleInputChange}
-                    placeholder="連載の説明を入力"
-                    maxLength={500}
-                    rows={3}
-                  />
-                </div>
-                
-                <div className={styles.formGroup}>
-                  <label htmlFor="seriesPassword">連載パスワード（任意）</label>
-                  <input
-                    type="password"
-                    id="seriesPassword"
-                    name="seriesPassword"
-                    value={formData.seriesPassword}
-                    onChange={handleInputChange}
-                    placeholder="連載を保護するパスワードを設定（空白の場合は保護なし）"
-                    maxLength={100}
-                  />
-                </div>
-              </>
-            )}
             
             <div className={styles.formGroup}>
               <div className={styles.commentToggleWrapper}>
