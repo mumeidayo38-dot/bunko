@@ -12,6 +12,7 @@ export default function AdminUpdates() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -21,10 +22,27 @@ export default function AdminUpdates() {
         router.push('/admin');
         return;
       }
+      
+      const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+      setIsDarkMode(savedDarkMode);
+      if (savedDarkMode) {
+        document.documentElement.classList.add('dark-mode');
+      }
     }
     
     loadUpdates();
   }, []);
+
+  const toggleDarkMode = () => {
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    localStorage.setItem('darkMode', newDarkMode.toString());
+    if (newDarkMode) {
+      document.documentElement.classList.add('dark-mode');
+    } else {
+      document.documentElement.classList.remove('dark-mode');
+    }
+  };
 
   const loadUpdates = async () => {
     setLoading(true);
@@ -124,42 +142,32 @@ export default function AdminUpdates() {
         <title>アップデート管理 - おぜう文庫 web</title>
       </Head>
       <div className={styles.container}>
+        <button 
+          className={styles.darkModeToggle}
+          onClick={toggleDarkMode}
+          aria-label={isDarkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
+        >
+          {isDarkMode ? '☀' : '☾'}
+        </button>
         <header style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center',
           marginBottom: '2rem',
-          borderBottom: '1px solid #e0e0e0',
+          borderBottom: '1px solid var(--border-color)',
           paddingBottom: '1rem'
         }}>
           <h1 className={styles.title} style={{ margin: 0 }}>アップデート管理</h1>
           <div>
             <button
               onClick={() => router.push('/admin/dashboard')}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#666',
-                color: 'white',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer',
-                fontSize: '0.9em',
-                marginRight: '10px'
-              }}
+              className={styles.adminButton}
             >
               ダッシュボード
             </button>
             <button
               onClick={logout}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#333',
-                color: 'white',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer',
-                fontSize: '0.9em'
-              }}
+              className={styles.adminButtonPrimary}
             >
               ログアウト
             </button>
@@ -167,12 +175,7 @@ export default function AdminUpdates() {
         </header>
 
         {/* 投稿フォーム */}
-        <div style={{ 
-          backgroundColor: '#f8f9fa', 
-          padding: '30px', 
-          borderRadius: '8px',
-          marginBottom: '40px'
-        }}>
+        <div className={styles.adminFormSection}>
           <h2 style={{ marginTop: 0, marginBottom: '20px' }}>新しいアップデート情報</h2>
           <form onSubmit={handleSubmit}>
             <div className={styles.formGroup}>
@@ -238,17 +241,7 @@ export default function AdminUpdates() {
                     <button
                       onClick={() => deleteUpdate(update.id)}
                       disabled={deleting === update.id}
-                      style={{
-                        padding: '6px 12px',
-                        backgroundColor: '#dc3545',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: deleting === update.id ? 'not-allowed' : 'pointer',
-                        opacity: deleting === update.id ? 0.6 : 1,
-                        fontSize: '0.85em',
-                        marginLeft: '15px'
-                      }}
+                      className={styles.adminDeleteButton}
                     >
                       {deleting === update.id ? '削除中...' : '削除'}
                     </button>
