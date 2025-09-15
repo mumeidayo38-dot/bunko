@@ -120,12 +120,12 @@ export default function Post() {
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://ozeu-bunko.vercel.app/post" />
+        <meta property="og:url" content="https://bunko.ozetudo.blog/post" />
         <meta property="og:title" content="文学作品投稿 - おぜう文庫 web" />
         <meta property="og:description" content="おぜう文庫で小説、詩、エッセイなどの文学作品を投稿しよう。" />
         <meta property="og:site_name" content="おぜう文庫" />
         
-        <link rel="canonical" href="https://ozeu-bunko.vercel.app/post" />
+        <link rel="canonical" href="https://bunko.ozetudo.blog/post" />
       </Head>
       <div className={styles.container}>
         <button 
