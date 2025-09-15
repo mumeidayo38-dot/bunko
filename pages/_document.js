@@ -10,6 +10,20 @@ export default function Document() {
         />
       </Head>
       <body>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var savedDarkMode = localStorage.getItem('darkMode') === 'true';
+                  if (savedDarkMode) {
+                    document.documentElement.classList.add('dark-mode');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
         <Main />
         <NextScript />
       </body>
