@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
@@ -9,7 +9,27 @@ export default function AdminLogin() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [captchaToken, setCaptchaToken] = useState('');
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+    setIsDarkMode(savedDarkMode);
+    if (savedDarkMode) {
+      document.documentElement.classList.add('dark-mode');
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    localStorage.setItem('darkMode', newDarkMode.toString());
+    if (newDarkMode) {
+      document.documentElement.classList.add('dark-mode');
+    } else {
+      document.documentElement.classList.remove('dark-mode');
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -54,6 +74,13 @@ export default function AdminLogin() {
         <title>管理 - おぜう文庫 web</title>
       </Head>
       <div className={styles.container}>
+        <button 
+          className={styles.darkModeToggle}
+          onClick={toggleDarkMode}
+          aria-label={isDarkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
+        >
+          {isDarkMode ? '☀' : '☾'}
+        </button>
         <h1 className={styles.title}>管理</h1>
         
         <div style={{ maxWidth: '400px', margin: '0 auto' }}>
@@ -73,6 +100,7 @@ export default function AdminLogin() {
               <label>認証</label>
               <HCaptcha
                 sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY || "10000000-ffff-ffff-ffff-000000000001"}
+                theme={isDarkMode ? "dark" : "light"}
                 onVerify={(token) => setCaptchaToken(token)}
                 onExpire={() => setCaptchaToken('')}
                 onError={() => setCaptchaToken('')}
