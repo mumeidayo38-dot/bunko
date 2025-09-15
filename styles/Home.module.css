@@ -125,13 +125,16 @@
 }
 
 .searchContainer {
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
   margin: 30px 0;
+  flex-wrap: wrap;
 }
 
 .searchInput {
-  width: 100%;
-  max-width: 400px;
+  flex: 1;
+  max-width: 300px;
   padding: 12px 20px;
   border: 2px solid var(--border-color);
   border-radius: 25px;
@@ -151,6 +154,32 @@
 
 .searchInput::placeholder {
   color: #aaa;
+}
+
+.seriesTagSelect {
+  padding: 12px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 25px;
+  font-size: 1em;
+  font-family: inherit;
+  background: var(--bg-color);
+  color: var(--text-color);
+  min-width: 150px;
+  max-width: 200px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.seriesTagSelect:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 10px rgba(74, 144, 226, 0.2);
+}
+
+:global(.dark-mode) .seriesTagSelect {
+  background: var(--card-bg-color);
+  color: var(--text-color);
+  border-color: #555;
 }
 
 .homeView,
@@ -997,6 +1026,120 @@
 
 :global(.dark-mode) .adminEmptyState {
   color: #aaa;
+}
+
+.tagsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tagItem {
+  background: var(--card-bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  transition: box-shadow 0.3s;
+}
+
+.tagItem:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+:global(.dark-mode) .tagItem:hover {
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+}
+
+.tagInfo {
+  flex: 1;
+}
+
+.tagName {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.lockIcon {
+  font-size: 0.8em;
+}
+
+.tagDescription {
+  color: #666;
+  font-size: 0.9em;
+  margin-bottom: 5px;
+  line-height: 1.4;
+}
+
+:global(.dark-mode) .tagDescription {
+  color: #aaa;
+}
+
+.tagDate {
+  font-size: 0.8em;
+  color: #999;
+}
+
+:global(.dark-mode) .tagDate {
+  color: #888;
+}
+
+.tagActions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.editBtn {
+  background: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.editBtn:hover {
+  background: #357abd;
+}
+
+.deleteBtn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.deleteBtn:hover {
+  background: #c82333;
+}
+
+.cancelBtn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.cancelBtn:hover {
+  background: #5a6268;
 }
 
 .adminPrimaryButton {
