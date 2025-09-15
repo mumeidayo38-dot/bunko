@@ -8,7 +8,7 @@ Disallow: /admin/
 Disallow: /api/
 
 # サイトマップの場所
-Sitemap: https://ozeu-bunko.vercel.app/sitemap.xml
+Sitemap: https://bunko.ozetudo.blog/sitemap.xml
 
 # 検索エンジンに対する追加指示
 Crawl-delay: 1
