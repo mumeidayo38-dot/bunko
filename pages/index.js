@@ -180,7 +180,7 @@ export default function Home() {
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://ozeu-bunko.vercel.app/" />
+        <meta property="og:url" content="https://bunko.ozetudo.blog/" />
         <meta property="og:title" content="おぜう文庫(ozeu文庫)" />
         <meta property="og:description" content="おぜうの集いの文庫集、狂ってる文集がたくさん！" />
         <meta property="og:site_name" content="おぜう文庫" />
@@ -199,11 +199,11 @@ export default function Home() {
               "@type": "WebSite",
               "name": "おぜう文庫",
               "alternateName": ["おぜう文庫 web", "ozeu bunko", "ozeu文庫"],
-              "url": "https://ozeu-bunko.vercel.app/",
+              "url": "https://bunko.ozetudo.blog/",
               "description": "おぜうの集いの文庫集、狂ってる文集がたくさん！",
               "potentialAction": {
                 "@type": "SearchAction",
-                "target": "https://ozeu-bunko.vercel.app/?search={search_term_string}",
+                "target": "https://bunko.ozetudo.blog/?search={search_term_string}",
                 "query-input": "required name=search_term_string"
               }
             })
@@ -211,7 +211,7 @@ export default function Home() {
         />
         
         <link rel="icon" href="/favicon.ico" />
-        <link rel="canonical" href="https://ozeu-bunko.vercel.app/" />
+        <link rel="canonical" href="https://bunko.ozetudo.blog/" />
       </Head>
       
       <div className={styles.container}>
