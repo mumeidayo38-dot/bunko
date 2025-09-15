@@ -44,9 +44,23 @@ export default function Post() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.author || !formData.content) {
-      showMessage('すべての項目を入力してください', 'error');
+    // 基本項目のバリデーション
+    if (!formData.author || !formData.content) {
+      showMessage('作成者と本文は必須です', 'error');
       return;
+    }
+
+    // タイトル関連のバリデーション
+    if (formData.isSeriesEnabled) {
+      if (!formData.seriesName || !formData.episodeTitle) {
+        showMessage('連載タイトルと話数タイトルは必須です', 'error');
+        return;
+      }
+    } else {
+      if (!formData.title) {
+        showMessage('タイトルは必須です', 'error');
+        return;
+      }
     }
 
     if (!captchaToken) {
@@ -57,10 +71,6 @@ export default function Post() {
     // 連載が有効な場合の処理
     let seriesTagId = null;
     if (formData.isSeriesEnabled) {
-      if (!formData.seriesName || !formData.episodeTitle) {
-        showMessage('連載タイトルと話数タイトルは必須です', 'error');
-        return;
-      }
       
       try {
         // 連載タグを作成または取得
