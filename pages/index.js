@@ -205,12 +205,21 @@ export default function Home() {
   };
 
   const handleBunkoClick = (bunko) => {
-    setSelectedBunko(bunko);
-    setComments([]);
-    setLikes({ count: 0, liked: false });
-    setCommentForm({ author: '', content: '', captchaToken: '' });
-    loadComments(bunko.id);
-    loadLikes(bunko.id);
+    if (bunko.isSeries) {
+      // 連載の場合は全エピソード表示のみ
+      setSelectedBunko(bunko);
+      setComments([]);
+      setLikes({ count: 0, liked: false });
+      setCommentForm({ author: '', content: '', captchaToken: '' });
+    } else {
+      // 単発投稿の場合は従来通り
+      setSelectedBunko(bunko);
+      setComments([]);
+      setLikes({ count: 0, liked: false });
+      setCommentForm({ author: '', content: '', captchaToken: '' });
+      loadComments(bunko.id);
+      loadLikes(bunko.id);
+    }
   };
 
   const handleSearchChange = (e) => {
@@ -404,15 +413,16 @@ export default function Home() {
                   <div className={styles.detailAuthor}>作成者: {selectedBunko.author}</div>
                   
                   <div className={styles.episodeList}>
-                    <h3>エピソード一覧:</h3>
                     {selectedBunko.allEpisodes.map((episode, index) => (
                       <div key={episode.id} className={styles.episodeItem}>
-                        <div className={styles.episodeTitle}>
-                          {episode.title}
-                          {index === 0 && <span className={styles.latestBadge}>最新</span>}
-                        </div>
-                        <div className={styles.episodeDate}>
-                          {new Date(episode.created_at).toLocaleDateString('ja-JP')}
+                        <div className={styles.episodeHeader}>
+                          <div className={styles.episodeTitle}>
+                            {episode.title}
+                            {index === 0 && <span className={styles.latestBadge}>最新</span>}
+                          </div>
+                          <div className={styles.episodeDate}>
+                            {new Date(episode.created_at).toLocaleDateString('ja-JP')}
+                          </div>
                         </div>
                         <div className={styles.episodeContent}>{episode.content}</div>
                       </div>
@@ -427,126 +437,131 @@ export default function Home() {
                 </>
               )}
               
-              {/* いいねボタン */}
-              <div className={styles.likeSection}>
-                <button
-                  onClick={() => handleLike(selectedBunko.id)}
-                  className={`${styles.likeButton} ${likes.liked ? styles.liked : ''}`}
-                >
-                  <span 
-                    style={{ 
-                      fontSize: '16px',
-                      position: 'relative',
-                      display: 'inline-block'
-                    }}
-                  >
-                    <span style={{
-                      color: '#333',
-                      fontSize: '16px'
-                    }}>♡</span>
-                    <span style={{
-                      position: 'absolute',
-                      top: '0',
-                      left: '0',
-                      color: likes.liked ? '#ff4757' : 'transparent',
-                      fontSize: '16px',
-                      transition: 'color 0.3s ease'
-                    }}>♥</span>
-                  </span>
-                  {likes.count}
-                </button>
-              </div>
+              {/* 連載の場合はいいね・コメント機能なし、単発投稿の場合のみ表示 */}
+              {!selectedBunko.isSeries && (
+                <>
+                  {/* いいねボタン */}
+                  <div className={styles.likeSection}>
+                    <button
+                      onClick={() => handleLike(selectedBunko.id)}
+                      className={`${styles.likeButton} ${likes.liked ? styles.liked : ''}`}
+                    >
+                      <span 
+                        style={{ 
+                          fontSize: '16px',
+                          position: 'relative',
+                          display: 'inline-block'
+                        }}
+                      >
+                        <span style={{
+                          color: '#333',
+                          fontSize: '16px'
+                        }}>♡</span>
+                        <span style={{
+                          position: 'absolute',
+                          top: '0',
+                          left: '0',
+                          color: likes.liked ? '#ff4757' : 'transparent',
+                          fontSize: '16px',
+                          transition: 'color 0.3s ease'
+                        }}>♥</span>
+                      </span>
+                      {likes.count}
+                    </button>
+                  </div>
 
-              {/* コメントセクション */}
-              {selectedBunko.comments_enabled ? (
-                <div className={styles.commentSection}>
-                  <h3 style={{ marginBottom: '15px', fontSize: '1.1em' }}>
-                    コメント ({comments.length})
-                  </h3>
-                
-                {/* コメント一覧 */}
-                {comments.length > 0 ? (
-                  <div style={{ marginBottom: '20px' }}>
-                    {comments.map((comment) => (
-                      <div key={comment.id} className={styles.commentItem}>
-                        <div className={styles.commentAuthor}>
-                          {comment.author}
-                        </div>
-                        <div className={styles.commentContent}>
-                          {comment.content}
-                        </div>
-                        <div className={styles.commentDate}>
-                          {new Date(comment.created_at).toLocaleString('ja-JP')}
-                        </div>
+                  {/* コメントセクション */}
+                  {selectedBunko.comments_enabled ? (
+                    <div className={styles.commentSection}>
+                      <h3 style={{ marginBottom: '15px', fontSize: '1.1em' }}>
+                        コメント ({comments.length})
+                      </h3>
+                    
+                    {/* コメント一覧 */}
+                    {comments.length > 0 ? (
+                      <div style={{ marginBottom: '20px' }}>
+                        {comments.map((comment) => (
+                          <div key={comment.id} className={styles.commentItem}>
+                            <div className={styles.commentAuthor}>
+                              {comment.author}
+                            </div>
+                            <div className={styles.commentContent}>
+                              {comment.content}
+                            </div>
+                            <div className={styles.commentDate}>
+                              {new Date(comment.created_at).toLocaleString('ja-JP')}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className={styles.emptyComment}>
-                    まだコメントがありません
-                  </div>
-                )}
+                    ) : (
+                      <div className={styles.emptyComment}>
+                        まだコメントがありません
+                      </div>
+                    )}
 
-                {/* コメント投稿フォーム */}
-                <form onSubmit={handleCommentSubmit}>
-                  <div style={{ marginBottom: '12px' }}>
-                    <input
-                      type="text"
-                      placeholder="名前"
-                      value={commentForm.author}
-                      onChange={(e) => setCommentForm({
-                        ...commentForm,
-                        author: e.target.value
-                      })}
-                      className={styles.commentFormInput}
-                      maxLength={50}
-                      required
-                    />
-                  </div>
-                  <div style={{ marginBottom: '12px' }}>
-                    <textarea
-                      placeholder="コメントを入力..."
-                      value={commentForm.content}
-                      onChange={(e) => setCommentForm({
-                        ...commentForm,
-                        content: e.target.value
-                      })}
-                      className={styles.commentFormTextarea}
-                      maxLength={1000}
-                      required
-                    />
-                  </div>
-                  <div style={{ marginBottom: '12px' }}>
-                    <HCaptcha
-                      sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY || "10000000-ffff-ffff-ffff-000000000001"}
-                      theme={isDarkMode ? "dark" : "light"}
-                      onVerify={(token) => setCommentForm({
-                        ...commentForm,
-                        captchaToken: token
-                      })}
-                      onExpire={() => setCommentForm({
-                        ...commentForm,
-                        captchaToken: ''
-                      })}
-                      onError={() => setCommentForm({
-                        ...commentForm,
-                        captchaToken: ''
-                      })}
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={commentLoading || !commentForm.captchaToken}
-                    className={styles.commentSubmitButton}
-                  >
-                    {commentLoading ? '投稿中...' : 'コメント投稿'}
-                  </button>
-                </form>
-                </div>
-              ) : (
-                <div className={styles.disabledComments}>
-                  この投稿はコメントが無効になっています
-                </div>
+                    {/* コメント投稿フォーム */}
+                    <form onSubmit={handleCommentSubmit}>
+                      <div style={{ marginBottom: '12px' }}>
+                        <input
+                          type="text"
+                          placeholder="名前"
+                          value={commentForm.author}
+                          onChange={(e) => setCommentForm({
+                            ...commentForm,
+                            author: e.target.value
+                          })}
+                          className={styles.commentFormInput}
+                          maxLength={50}
+                          required
+                        />
+                      </div>
+                      <div style={{ marginBottom: '12px' }}>
+                        <textarea
+                          placeholder="コメントを入力..."
+                          value={commentForm.content}
+                          onChange={(e) => setCommentForm({
+                            ...commentForm,
+                            content: e.target.value
+                          })}
+                          className={styles.commentFormTextarea}
+                          maxLength={1000}
+                          required
+                        />
+                      </div>
+                      <div style={{ marginBottom: '12px' }}>
+                        <HCaptcha
+                          sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY || "10000000-ffff-ffff-ffff-000000000001"}
+                          theme={isDarkMode ? "dark" : "light"}
+                          onVerify={(token) => setCommentForm({
+                            ...commentForm,
+                            captchaToken: token
+                          })}
+                          onExpire={() => setCommentForm({
+                            ...commentForm,
+                            captchaToken: ''
+                          })}
+                          onError={() => setCommentForm({
+                            ...commentForm,
+                            captchaToken: ''
+                          })}
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={commentLoading || !commentForm.captchaToken}
+                        className={styles.commentSubmitButton}
+                      >
+                        {commentLoading ? '投稿中...' : 'コメント投稿'}
+                      </button>
+                    </form>
+                    </div>
+                  ) : (
+                    <div className={styles.disabledComments}>
+                      この投稿はコメントが無効になっています
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
