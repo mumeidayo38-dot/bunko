@@ -1199,19 +1199,29 @@
   box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
 }
 
+.episodeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .episodeTitle {
   font-weight: 600;
   font-size: 1em;
   color: var(--text-color);
-  margin-bottom: 5px;
   display: flex;
   align-items: center;
+  flex: 1;
+  min-width: 200px;
 }
 
 .episodeDate {
   font-size: 0.8em;
   color: #999;
-  margin-bottom: 10px;
+  white-space: nowrap;
 }
 
 :global(.dark-mode) .episodeDate {
