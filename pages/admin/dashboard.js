@@ -13,6 +13,7 @@ export default function AdminDashboard() {
   const [filterResults, setFilterResults] = useState({ bunko: [], comments: [], total: 0 });
   const [filterForm, setFilterForm] = useState({ keyword: '', target: 'all' });
   const [filterLoading, setFilterLoading] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -22,11 +23,28 @@ export default function AdminDashboard() {
         router.push('/admin');
         return;
       }
+      
+      const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+      setIsDarkMode(savedDarkMode);
+      if (savedDarkMode) {
+        document.documentElement.classList.add('dark-mode');
+      }
     }
     
     fetchMessages();
     fetchBannedUsers();
   }, []);
+
+  const toggleDarkMode = () => {
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    localStorage.setItem('darkMode', newDarkMode.toString());
+    if (newDarkMode) {
+      document.documentElement.classList.add('dark-mode');
+    } else {
+      document.documentElement.classList.remove('dark-mode');
+    }
+  };
 
   const fetchMessages = async () => {
     try {
@@ -279,45 +297,32 @@ export default function AdminDashboard() {
         <title>管理 - おぜう文庫 web</title>
       </Head>
       <div className={styles.container}>
+        <button 
+          className={styles.darkModeToggle}
+          onClick={toggleDarkMode}
+          aria-label={isDarkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
+        >
+          {isDarkMode ? '☀' : '☾'}
+        </button>
         <header style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center',
           marginBottom: '2rem',
-          borderBottom: '1px solid #e0e0e0',
+          borderBottom: '1px solid var(--border-color)',
           paddingBottom: '1rem'
         }}>
           <h1 className={styles.title} style={{ margin: 0 }}>管理</h1>
           <div>
             <button
               onClick={() => router.push('/admin/updates')}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#666',
-                color: 'white',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer',
-                fontSize: '0.9em',
-                marginRight: '10px'
-              }}
+              className={styles.adminButton}
             >
               アップデート管理
             </button>
             <button
               onClick={logout}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#333',
-                color: 'white',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer',
-                fontSize: '0.9em',
-                transition: 'background 0.3s'
-              }}
-              onMouseOver={(e) => e.target.style.backgroundColor = '#555'}
-              onMouseOut={(e) => e.target.style.backgroundColor = '#333'}
+              className={styles.adminButtonPrimary}
             >
               ログアウト
             </button>
@@ -325,49 +330,22 @@ export default function AdminDashboard() {
         </header>
 
         {/* タブナビゲーション */}
-        <div style={{ 
-          display: 'flex', 
-          marginBottom: '2rem',
-          borderBottom: '1px solid #e0e0e0'
-        }}>
+        <div className={styles.adminTabContainer}>
           <button
             onClick={() => setActiveTab('messages')}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: activeTab === 'messages' ? '#333' : 'transparent',
-              color: activeTab === 'messages' ? 'white' : '#333',
-              border: 'none',
-              borderRadius: '5px 5px 0 0',
-              cursor: 'pointer',
-              marginRight: '5px'
-            }}
+            className={`${styles.adminTab} ${activeTab === 'messages' ? styles.adminTabActive : ''}`}
           >
             投稿管理
           </button>
           <button
             onClick={() => setActiveTab('ban')}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: activeTab === 'ban' ? '#333' : 'transparent',
-              color: activeTab === 'ban' ? 'white' : '#333',
-              border: 'none',
-              borderRadius: '5px 5px 0 0',
-              cursor: 'pointer',
-              marginRight: '5px'
-            }}
+            className={`${styles.adminTab} ${activeTab === 'ban' ? styles.adminTabActive : ''}`}
           >
             BAN管理
           </button>
           <button
             onClick={() => setActiveTab('filter')}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: activeTab === 'filter' ? '#333' : 'transparent',
-              color: activeTab === 'filter' ? 'white' : '#333',
-              border: 'none',
-              borderRadius: '5px 5px 0 0',
-              cursor: 'pointer'
-            }}
+            className={`${styles.adminTab} ${activeTab === 'filter' ? styles.adminTabActive : ''}`}
           >
             コンテンツフィルター
           </button>
@@ -375,7 +353,7 @@ export default function AdminDashboard() {
 
         {activeTab === 'messages' && (
           <div>
-            <div style={{ marginBottom: '1.5rem', color: '#666' }}>
+            <div className={styles.adminStatsText}>
               総数: {messages.length}件
             </div>
 
