@@ -1,31 +1,20 @@
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
-import path from 'path';
-
-// データベース接続
-async function openDB() {
-  return open({
-    filename: path.join(process.cwd(), 'database.sqlite'),
-    driver: sqlite3.Database
-  });
-}
+import { sql } from '@vercel/postgres';
 
 // 連載タグテーブルの初期化
-async function initSeriesTagsTable(db) {
-  await db.exec(`
+async function initSeriesTagsTable() {
+  await sql`
     CREATE TABLE IF NOT EXISTS series_tags (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      id SERIAL PRIMARY KEY,
       name TEXT NOT NULL UNIQUE,
       description TEXT,
       password TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
-  `);
+  `;
 }
 
 export default async function handler(req, res) {
-  const db = await openDB();
-  await initSeriesTagsTable(db);
+  await initSeriesTagsTable();
 
   if (req.method === 'GET') {
     try {
@@ -34,20 +23,20 @@ export default async function handler(req, res) {
       
       if (admin === 'true') {
         // 管理者用：すべての情報を含む
-        const tags = await db.all(`
+        const { rows } = await sql`
           SELECT id, name, description, password, created_at 
           FROM series_tags 
           ORDER BY created_at DESC
-        `);
-        res.status(200).json(tags);
+        `;
+        res.status(200).json(rows);
       } else {
         // 一般用：パスワードを除いた基本情報のみ
-        const tags = await db.all(`
+        const { rows } = await sql`
           SELECT id, name, description 
           FROM series_tags 
           ORDER BY created_at DESC
-        `);
-        res.status(200).json(tags);
+        `;
+        res.status(200).json(rows);
       }
     } catch (error) {
       console.error('連載タグ取得エラー:', error);
@@ -63,44 +52,39 @@ export default async function handler(req, res) {
           return res.status(400).json({ error: 'タグ名は必須です' });
         }
 
-        const result = await db.run(`
+        const { rows } = await sql`
           INSERT INTO series_tags (name, description, password) 
-          VALUES (?, ?, ?)
-        `, [name, description || '', password || '']);
+          VALUES (${name}, ${description || ''}, ${password || ''})
+          RETURNING id, name, description, password, created_at
+        `;
 
-        const newTag = await db.get(`
-          SELECT id, name, description, password, created_at 
-          FROM series_tags 
-          WHERE id = ?
-        `, [result.lastID]);
-
-        res.status(201).json(newTag);
+        res.status(201).json(rows[0]);
       } else if (action === 'update') {
         // 既存の連載タグを更新
         if (!id || !name) {
           return res.status(400).json({ error: 'IDとタグ名は必須です' });
         }
 
-        await db.run(`
+        await sql`
           UPDATE series_tags 
-          SET name = ?, description = ?, password = ? 
-          WHERE id = ?
-        `, [name, description || '', password || '', id]);
+          SET name = ${name}, description = ${description || ''}, password = ${password || ''}
+          WHERE id = ${id}
+        `;
 
-        const updatedTag = await db.get(`
+        const { rows } = await sql`
           SELECT id, name, description, password, created_at 
           FROM series_tags 
-          WHERE id = ?
-        `, [id]);
+          WHERE id = ${id}
+        `;
 
-        res.status(200).json(updatedTag);
+        res.status(200).json(rows[0]);
       } else if (action === 'delete') {
         // 連載タグを削除
         if (!id) {
           return res.status(400).json({ error: 'IDは必須です' });
         }
 
-        await db.run('DELETE FROM series_tags WHERE id = ?', [id]);
+        await sql`DELETE FROM series_tags WHERE id = ${id}`;
         res.status(200).json({ message: '連載タグを削除しました' });
       } else if (action === 'verify') {
         // パスワード認証
@@ -108,14 +92,14 @@ export default async function handler(req, res) {
           return res.status(400).json({ error: 'IDとパスワードは必須です' });
         }
 
-        const tag = await db.get(`
+        const { rows } = await sql`
           SELECT id, name, description 
           FROM series_tags 
-          WHERE id = ? AND password = ?
-        `, [id, password]);
+          WHERE id = ${id} AND password = ${password}
+        `;
 
-        if (tag) {
-          res.status(200).json({ verified: true, tag });
+        if (rows.length > 0) {
+          res.status(200).json({ verified: true, tag: rows[0] });
         } else {
           res.status(401).json({ verified: false, error: 'パスワードが正しくありません' });
         }
@@ -124,7 +108,7 @@ export default async function handler(req, res) {
       }
     } catch (error) {
       console.error('連載タグ操作エラー:', error);
-      if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+      if (error.code === '23505') { // PostgreSQL unique violation
         res.status(400).json({ error: 'このタグ名は既に存在します' });
       } else {
         res.status(500).json({ error: '連載タグの操作に失敗しました' });
@@ -135,5 +119,4 @@ export default async function handler(req, res) {
     res.status(405).json({ error: 'Method not allowed' });
   }
 
-  await db.close();
 }
