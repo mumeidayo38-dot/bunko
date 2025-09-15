@@ -113,7 +113,19 @@ export default function Post() {
   return (
     <>
       <Head>
-        <title>投稿 - おぜう文庫 web</title>
+        <title>文学作品投稿 - おぜう文庫 web</title>
+        <meta name="description" content="おぜう文庫で小説、詩、エッセイなどの文学作品を投稿しよう。あなたの創作を多くの読者と共有できます。" />
+        <meta name="keywords" content="おぜう文庫,ozeu bunko,ozeu文庫,文学作品投稿,小説投稿,詩投稿,エッセイ投稿,創作,文学,novel post,poetry post,essay post,creative writing" />
+        <meta name="robots" content="noindex, follow" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://ozeu-bunko.vercel.app/post" />
+        <meta property="og:title" content="文学作品投稿 - おぜう文庫 web" />
+        <meta property="og:description" content="おぜう文庫で小説、詩、エッセイなどの文学作品を投稿しよう。" />
+        <meta property="og:site_name" content="おぜう文庫" />
+        
+        <link rel="canonical" href="https://ozeu-bunko.vercel.app/post" />
       </Head>
       <div className={styles.container}>
         <button 
