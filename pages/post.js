@@ -11,8 +11,11 @@ export default function Post() {
     title: '',
     author: '',
     content: '',
-    commentsEnabled: true
+    commentsEnabled: true,
+    seriesTagId: ''
   });
+  const [seriesTags, setSeriesTags] = useState([]);
+  const [seriesPassword, setSeriesPassword] = useState('');
   const [captchaToken, setCaptchaToken] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
   const router = useRouter();
@@ -23,7 +26,21 @@ export default function Post() {
     if (savedDarkMode) {
       document.documentElement.classList.add('dark-mode');
     }
+    loadSeriesTags();
   }, []);
+
+  const loadSeriesTags = async () => {
+    try {
+      const response = await fetch('/api/admin/series-tags');
+      if (response.ok) {
+        const data = await response.json();
+        setSeriesTags(Array.isArray(data) ? data : []);
+      }
+    } catch (error) {
+      console.error('連載タグ取得エラー:', error);
+      setSeriesTags([]);
+    }
+  };
 
   const toggleDarkMode = () => {
     const newDarkMode = !isDarkMode;
@@ -48,12 +65,43 @@ export default function Post() {
       showMessage('認証を完了してください', 'error');
       return;
     }
+
+    // 連載タグが選択されている場合のパスワード検証
+    if (formData.seriesTagId && seriesPassword) {
+      const selectedTag = seriesTags.find(tag => tag.id === parseInt(formData.seriesTagId));
+      if (selectedTag && selectedTag.password) {
+        try {
+          const verifyResponse = await fetch('/api/admin/series-tags', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'verify',
+              id: selectedTag.id,
+              password: seriesPassword
+            })
+          });
+
+          const verifyData = await verifyResponse.json();
+          if (!verifyData.verified) {
+            showMessage('連載タグのパスワードが正しくありません', 'error');
+            return;
+          }
+        } catch (error) {
+          console.error('パスワード検証エラー:', error);
+          showMessage('パスワード検証中にエラーが発生しました', 'error');
+          return;
+        }
+      }
+    }
     
     setLoading(true);
     
     const requestData = {
       ...formData,
-      captchaToken
+      captchaToken,
+      seriesTagId: formData.seriesTagId || null
     };
     console.log('Sending request:', requestData);
     
@@ -82,8 +130,9 @@ export default function Post() {
       }
 
       showMessage('投稿が完了しました', 'success');
-      setFormData({ title: '', author: '', content: '', commentsEnabled: true });
+      setFormData({ title: '', author: '', content: '', commentsEnabled: true, seriesTagId: '' });
       setCaptchaToken('');
+      setSeriesPassword('');
       
       setTimeout(() => {
         router.push('/');
@@ -184,6 +233,37 @@ export default function Post() {
                 required
               />
             </div>
+            
+            <div className={styles.formGroup}>
+              <label htmlFor="seriesTag">連載タグ（任意）</label>
+              <select
+                id="seriesTag"
+                name="seriesTagId"
+                value={formData.seriesTagId}
+                onChange={handleInputChange}
+              >
+                <option value="">選択してください</option>
+                {seriesTags.map((tag) => (
+                  <option key={tag.id} value={tag.id}>
+                    {tag.name} {tag.description && `- ${tag.description}`}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {formData.seriesTagId && seriesTags.find(tag => tag.id === parseInt(formData.seriesTagId))?.password && (
+              <div className={styles.formGroup}>
+                <label htmlFor="seriesPassword">連載タグパスワード</label>
+                <input
+                  type="password"
+                  id="seriesPassword"
+                  value={seriesPassword}
+                  onChange={(e) => setSeriesPassword(e.target.value)}
+                  placeholder="連載タグのパスワードを入力"
+                  required
+                />
+              </div>
+            )}
             
             <div className={styles.formGroup}>
               <div className={styles.commentToggleWrapper}>
