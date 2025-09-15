@@ -54,12 +54,12 @@ export default function Updates() {
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://ozeu-bunko.vercel.app/updates" />
+        <meta property="og:url" content="https://bunko.ozetudo.blog/updates" />
         <meta property="og:title" content="サイトアップデート情報 - おぜう文庫 web" />
         <meta property="og:description" content="おぜう文庫の最新アップデート情報をご確認いただけます。" />
         <meta property="og:site_name" content="おぜう文庫" />
         
-        <link rel="canonical" href="https://ozeu-bunko.vercel.app/updates" />
+        <link rel="canonical" href="https://bunko.ozetudo.blog/updates" />
       </Head>
       <div className={styles.container}>
         <button 
