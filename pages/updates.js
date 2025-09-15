@@ -48,7 +48,18 @@ export default function Updates() {
   return (
     <>
       <Head>
-        <title>むめーのアップデート一覧 - おぜう文庫 web</title>
+        <title>サイトアップデート情報 - おぜう文庫 web</title>
+        <meta name="description" content="おぜう文庫の最新アップデート情報をご確認いただけます。新機能追加やサイト改善の情報をお知らせします。" />
+        <meta name="keywords" content="おぜう文庫,ozeu bunko,ozeu文庫,アップデート,更新情報,新機能,サイト改善,updates,news,features" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://ozeu-bunko.vercel.app/updates" />
+        <meta property="og:title" content="サイトアップデート情報 - おぜう文庫 web" />
+        <meta property="og:description" content="おぜう文庫の最新アップデート情報をご確認いただけます。" />
+        <meta property="og:site_name" content="おぜう文庫" />
+        
+        <link rel="canonical" href="https://ozeu-bunko.vercel.app/updates" />
       </Head>
       <div className={styles.container}>
         <button 
