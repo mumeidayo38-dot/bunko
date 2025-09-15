@@ -13,10 +13,27 @@ export default function Home() {
   const [commentForm, setCommentForm] = useState({ author: '', content: '', captchaToken: '' });
   const [commentLoading, setCommentLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     loadBunkoList();
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+    setIsDarkMode(savedDarkMode);
+    if (savedDarkMode) {
+      document.documentElement.classList.add('dark-mode');
+    }
   }, []);
+
+  const toggleDarkMode = () => {
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    localStorage.setItem('darkMode', newDarkMode.toString());
+    if (newDarkMode) {
+      document.documentElement.classList.add('dark-mode');
+    } else {
+      document.documentElement.classList.remove('dark-mode');
+    }
+  };
 
   const loadBunkoList = async () => {
     setLoading(true);
@@ -162,6 +179,13 @@ export default function Home() {
       </Head>
       
       <div className={styles.container}>
+        <button 
+          className={styles.darkModeToggle}
+          onClick={toggleDarkMode}
+          aria-label={isDarkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
+        >
+{isDarkMode ? '☀' : '☾'}
+        </button>
         <h1 className={styles.title}>おぜう文庫 web</h1>
         
         <nav className={styles.nav}>
@@ -240,30 +264,10 @@ export default function Home() {
               <div className={styles.detailText}>{selectedBunko.content}</div>
               
               {/* いいねボタン */}
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '10px',
-                marginTop: '20px',
-                paddingTop: '20px',
-                borderTop: '1px solid #e0e0e0'
-              }}>
+              <div className={styles.likeSection}>
                 <button
                   onClick={() => handleLike(selectedBunko.id)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    padding: '8px 16px',
-                    backgroundColor: likes.liked ? '#ff4757' : '#f1f2f6',
-                    color: likes.liked ? 'white' : '#2c3e50',
-                    border: 'none',
-                    borderRadius: '20px',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    transition: 'all 0.2s'
-                  }}
+                  className={`${styles.likeButton} ${likes.liked ? styles.liked : ''}`}
                 >
                   <span 
                     style={{ 
@@ -291,7 +295,7 @@ export default function Home() {
 
               {/* コメントセクション */}
               {selectedBunko.comments_enabled ? (
-                <div style={{ marginTop: '30px' }}>
+                <div className={styles.commentSection}>
                   <h3 style={{ marginBottom: '15px', fontSize: '1.1em' }}>
                     コメント ({comments.length})
                   </h3>
@@ -300,46 +304,21 @@ export default function Home() {
                 {comments.length > 0 ? (
                   <div style={{ marginBottom: '20px' }}>
                     {comments.map((comment) => (
-                      <div
-                        key={comment.id}
-                        style={{
-                          backgroundColor: '#f8f9fa',
-                          padding: '12px',
-                          borderRadius: '8px',
-                          marginBottom: '10px'
-                        }}
-                      >
-                        <div style={{ 
-                          fontWeight: '500', 
-                          fontSize: '0.9em',
-                          marginBottom: '5px'
-                        }}>
+                      <div key={comment.id} className={styles.commentItem}>
+                        <div className={styles.commentAuthor}>
                           {comment.author}
                         </div>
-                        <div style={{ 
-                          whiteSpace: 'pre-wrap',
-                          fontSize: '0.9em',
-                          lineHeight: '1.4'
-                        }}>
+                        <div className={styles.commentContent}>
                           {comment.content}
                         </div>
-                        <div style={{ 
-                          fontSize: '0.8em', 
-                          color: '#666', 
-                          marginTop: '8px'
-                        }}>
+                        <div className={styles.commentDate}>
                           {new Date(comment.created_at).toLocaleString('ja-JP')}
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div style={{ 
-                    textAlign: 'center', 
-                    color: '#666', 
-                    fontSize: '0.9em',
-                    margin: '20px 0'
-                  }}>
+                  <div className={styles.emptyComment}>
                     まだコメントがありません
                   </div>
                 )}
@@ -355,13 +334,7 @@ export default function Home() {
                         ...commentForm,
                         author: e.target.value
                       })}
-                      style={{
-                        width: '100%',
-                        padding: '8px 12px',
-                        border: '1px solid #ddd',
-                        borderRadius: '4px',
-                        fontSize: '0.9em'
-                      }}
+                      className={styles.commentFormInput}
                       maxLength={50}
                       required
                     />
@@ -374,15 +347,7 @@ export default function Home() {
                         ...commentForm,
                         content: e.target.value
                       })}
-                      style={{
-                        width: '100%',
-                        padding: '8px 12px',
-                        border: '1px solid #ddd',
-                        borderRadius: '4px',
-                        fontSize: '0.9em',
-                        minHeight: '80px',
-                        resize: 'vertical'
-                      }}
+                      className={styles.commentFormTextarea}
                       maxLength={1000}
                       required
                     />
@@ -390,6 +355,7 @@ export default function Home() {
                   <div style={{ marginBottom: '12px' }}>
                     <HCaptcha
                       sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY || "10000000-ffff-ffff-ffff-000000000001"}
+                      theme={isDarkMode ? "dark" : "light"}
                       onVerify={(token) => setCommentForm({
                         ...commentForm,
                         captchaToken: token
@@ -407,31 +373,14 @@ export default function Home() {
                   <button
                     type="submit"
                     disabled={commentLoading || !commentForm.captchaToken}
-                    style={{
-                      padding: '8px 16px',
-                      backgroundColor: '#333',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: commentLoading || !commentForm.captchaToken ? 'not-allowed' : 'pointer',
-                      fontSize: '0.9em',
-                      opacity: commentLoading || !commentForm.captchaToken ? 0.6 : 1
-                    }}
+                    className={styles.commentSubmitButton}
                   >
                     {commentLoading ? '投稿中...' : 'コメント投稿'}
                   </button>
                 </form>
                 </div>
               ) : (
-                <div style={{ 
-                  marginTop: '30px',
-                  textAlign: 'center',
-                  color: '#666',
-                  fontSize: '0.9em',
-                  padding: '20px',
-                  backgroundColor: '#f5f5f5',
-                  borderRadius: '8px'
-                }}>
+                <div className={styles.disabledComments}>
                   この投稿はコメントが無効になっています
                 </div>
               )}
