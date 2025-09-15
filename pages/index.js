@@ -13,32 +13,16 @@ export default function Home() {
   const [commentForm, setCommentForm] = useState({ author: '', content: '', captchaToken: '' });
   const [commentLoading, setCommentLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [seriesTags, setSeriesTags] = useState([]);
-  const [selectedSeriesTag, setSelectedSeriesTag] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     loadBunkoList();
-    loadSeriesTags();
     const savedDarkMode = localStorage.getItem('darkMode') === 'true';
     setIsDarkMode(savedDarkMode);
     if (savedDarkMode) {
       document.documentElement.classList.add('dark-mode');
     }
   }, []);
-
-  const loadSeriesTags = async () => {
-    try {
-      const response = await fetch('/api/admin/series-tags');
-      if (response.ok) {
-        const data = await response.json();
-        setSeriesTags(Array.isArray(data) ? data : []);
-      }
-    } catch (error) {
-      console.error('連載タグ取得エラー:', error);
-      setSeriesTags([]);
-    }
-  };
 
   const toggleDarkMode = () => {
     const newDarkMode = !isDarkMode;
@@ -58,12 +42,8 @@ export default function Home() {
       if (response.ok) {
         const data = await response.json();
         const bunkoData = Array.isArray(data) ? data : [];
-        
-        // 連載作品をグループ化して最新投稿順に並び替え
-        const processedData = processBunkoData(bunkoData);
-        
-        setBunkoList(processedData);
-        setFilteredBunkoList(processedData);
+        setBunkoList(bunkoData);
+        setFilteredBunkoList(bunkoData);
       }
     } catch (error) {
       console.error('Error loading bunko list:', error);
@@ -72,47 +52,6 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const processBunkoData = (data) => {
-    const seriesMap = new Map();
-    const singlePosts = [];
-
-    // データを連載とシングル投稿に分類
-    data.forEach(bunko => {
-      if (bunko.series_tag_id) {
-        if (!seriesMap.has(bunko.series_tag_id)) {
-          seriesMap.set(bunko.series_tag_id, []);
-        }
-        seriesMap.get(bunko.series_tag_id).push(bunko);
-      } else {
-        singlePosts.push(bunko);
-      }
-    });
-
-    // 連載作品を処理（各連載の最新投稿で代表）
-    const seriesRepresentatives = [];
-    seriesMap.forEach((episodes, seriesTagId) => {
-      // 各連載の最新エピソードを取得
-      episodes.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      const latestEpisode = episodes[0];
-      
-      // 連載情報を追加
-      const seriesInfo = {
-        ...latestEpisode,
-        isSeries: true,
-        episodeCount: episodes.length,
-        allEpisodes: episodes
-      };
-      
-      seriesRepresentatives.push(seriesInfo);
-    });
-
-    // すべての投稿を最新順で結合
-    const allPosts = [...seriesRepresentatives, ...singlePosts];
-    allPosts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-    return allPosts;
   };
 
   const loadComments = async (bunkoId) => {
@@ -205,55 +144,28 @@ export default function Home() {
   };
 
   const handleBunkoClick = (bunko) => {
-    if (bunko.isSeries) {
-      // 連載の場合は全エピソード表示のみ
-      setSelectedBunko(bunko);
-      setComments([]);
-      setLikes({ count: 0, liked: false });
-      setCommentForm({ author: '', content: '', captchaToken: '' });
-    } else {
-      // 単発投稿の場合は従来通り
-      setSelectedBunko(bunko);
-      setComments([]);
-      setLikes({ count: 0, liked: false });
-      setCommentForm({ author: '', content: '', captchaToken: '' });
-      loadComments(bunko.id);
-      loadLikes(bunko.id);
-    }
+    setSelectedBunko(bunko);
+    setComments([]);
+    setLikes({ count: 0, liked: false });
+    setCommentForm({ author: '', content: '', captchaToken: '' });
+    loadComments(bunko.id);
+    loadLikes(bunko.id);
   };
 
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
-    applyFilters(query, selectedSeriesTag);
-  };
-
-  const handleSeriesTagChange = (e) => {
-    const tagId = e.target.value;
-    setSelectedSeriesTag(tagId);
-    applyFilters(searchQuery, tagId);
-  };
-
-  const applyFilters = (query, tagId) => {
-    let filtered = bunkoList;
-
-    // 連載タグでフィルター
-    if (tagId) {
-      filtered = filtered.filter(bunko => 
-        bunko.series_tag_id === parseInt(tagId)
-      );
-    }
-
-    // 検索クエリでフィルター
-    if (query.trim() !== '') {
-      filtered = filtered.filter(bunko => 
+    
+    if (query.trim() === '') {
+      setFilteredBunkoList(bunkoList);
+    } else {
+      const filtered = bunkoList.filter(bunko => 
         bunko.author.toLowerCase().includes(query.toLowerCase()) ||
         bunko.title.toLowerCase().includes(query.toLowerCase()) ||
         bunko.content.toLowerCase().includes(query.toLowerCase())
       );
+      setFilteredBunkoList(filtered);
     }
-
-    setFilteredBunkoList(filtered);
   };
 
 
@@ -338,18 +250,6 @@ export default function Home() {
             onChange={handleSearchChange}
             className={styles.searchInput}
           />
-          <select
-            value={selectedSeriesTag}
-            onChange={handleSeriesTagChange}
-            className={styles.seriesTagSelect}
-          >
-            <option value="">すべての投稿</option>
-            {seriesTags.map((tag) => (
-              <option key={tag.id} value={tag.id}>
-                {tag.name}
-              </option>
-            ))}
-          </select>
         </div>
 
         <div className={styles.homeView}>
@@ -357,28 +257,20 @@ export default function Home() {
             <div className={styles.loading}>読み込み中...</div>
           ) : filteredBunkoList.length === 0 ? (
             <div className={styles.emptyState}>
-              {searchQuery || selectedSeriesTag ? '検索結果が見つかりませんでした' : 'まだ投稿がありません'}
+              {searchQuery ? '検索結果が見つかりませんでした' : 'まだ投稿がありません'}
             </div>
           ) : (
             <div className={styles.bunkoList}>
               {filteredBunkoList.map((bunko) => (
                 <div
                   key={bunko.id}
-                  className={`${styles.bunkoItem} ${bunko.isSeries ? styles.seriesItem : ''}`}
+                  className={styles.bunkoItem}
                   onClick={() => handleBunkoClick(bunko)}
                 >
-                  <div className={styles.bunkoTitle}>
-                    {bunko.title}
-                    {bunko.isSeries && (
-                      <span className={styles.seriesBadge}>
-                        連載 ({bunko.episodeCount}話)
-                      </span>
-                    )}
-                  </div>
+                  <div className={styles.bunkoTitle}>{bunko.title}</div>
                   <div className={styles.bunkoAuthor}>作成者: {bunko.author}</div>
                   <div className={styles.bunkoPreview}>{bunko.content}</div>
                   <div className={styles.bunkoDate}>
-                    {bunko.isSeries ? '最新更新: ' : ''}
                     {new Date(bunko.created_at).toLocaleDateString('ja-JP')}
                   </div>
                 </div>
@@ -404,164 +296,130 @@ export default function Home() {
                 &times;
               </span>
               
-              {selectedBunko.isSeries ? (
-                <div className={styles.seriesDetail}>
-                  <h2 className={styles.detailTitle}>
-                    {selectedBunko.title.split(' - ')[0]}
-                    <span className={styles.seriesBadge}>連載 ({selectedBunko.episodeCount}話)</span>
-                  </h2>
-                  <div className={styles.detailAuthor}>作成者: {selectedBunko.author}</div>
-                  
-                  <div className={styles.episodeList}>
-                    {selectedBunko.allEpisodes.map((episode, index) => (
-                      <div key={episode.id} className={styles.episodeItem}>
-                        <div className={styles.episodeHeader}>
-                          <div className={styles.episodeTitle}>
-                            {episode.title}
-                            {index === 0 && <span className={styles.latestBadge}>最新</span>}
-                          </div>
-                          <div className={styles.episodeDate}>
-                            {new Date(episode.created_at).toLocaleDateString('ja-JP')}
-                          </div>
+              <h2 className={styles.detailTitle}>{selectedBunko.title}</h2>
+              <div className={styles.detailAuthor}>作成者: {selectedBunko.author}</div>
+              <div className={styles.detailText}>{selectedBunko.content}</div>
+              
+              {/* いいねボタン */}
+              <div className={styles.likeSection}>
+                <button
+                  onClick={() => handleLike(selectedBunko.id)}
+                  className={`${styles.likeButton} ${likes.liked ? styles.liked : ''}`}
+                >
+                  <span 
+                    style={{ 
+                      fontSize: '16px',
+                      position: 'relative',
+                      display: 'inline-block'
+                    }}
+                  >
+                    <span style={{
+                      color: '#333',
+                      fontSize: '16px'
+                    }}>♡</span>
+                    <span style={{
+                      position: 'absolute',
+                      top: '0',
+                      left: '0',
+                      color: likes.liked ? '#ff4757' : 'transparent',
+                      fontSize: '16px',
+                      transition: 'color 0.3s ease'
+                    }}>♥</span>
+                  </span>
+                  {likes.count}
+                </button>
+              </div>
+
+              {/* コメントセクション */}
+              {selectedBunko.comments_enabled ? (
+                <div className={styles.commentSection}>
+                  <h3 style={{ marginBottom: '15px', fontSize: '1.1em' }}>
+                    コメント ({comments.length})
+                  </h3>
+                
+                {/* コメント一覧 */}
+                {comments.length > 0 ? (
+                  <div style={{ marginBottom: '20px' }}>
+                    {comments.map((comment) => (
+                      <div key={comment.id} className={styles.commentItem}>
+                        <div className={styles.commentAuthor}>
+                          {comment.author}
                         </div>
-                        <div className={styles.episodeContent}>{episode.content}</div>
+                        <div className={styles.commentContent}>
+                          {comment.content}
+                        </div>
+                        <div className={styles.commentDate}>
+                          {new Date(comment.created_at).toLocaleString('ja-JP')}
+                        </div>
                       </div>
                     ))}
                   </div>
+                ) : (
+                  <div className={styles.emptyComment}>
+                    まだコメントがありません
+                  </div>
+                )}
+
+                {/* コメント投稿フォーム */}
+                <form onSubmit={handleCommentSubmit}>
+                  <div style={{ marginBottom: '12px' }}>
+                    <input
+                      type="text"
+                      placeholder="名前"
+                      value={commentForm.author}
+                      onChange={(e) => setCommentForm({
+                        ...commentForm,
+                        author: e.target.value
+                      })}
+                      className={styles.commentFormInput}
+                      maxLength={50}
+                      required
+                    />
+                  </div>
+                  <div style={{ marginBottom: '12px' }}>
+                    <textarea
+                      placeholder="コメントを入力..."
+                      value={commentForm.content}
+                      onChange={(e) => setCommentForm({
+                        ...commentForm,
+                        content: e.target.value
+                      })}
+                      className={styles.commentFormTextarea}
+                      maxLength={1000}
+                      required
+                    />
+                  </div>
+                  <div style={{ marginBottom: '12px' }}>
+                    <HCaptcha
+                      sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY || "10000000-ffff-ffff-ffff-000000000001"}
+                      theme={isDarkMode ? "dark" : "light"}
+                      onVerify={(token) => setCommentForm({
+                        ...commentForm,
+                        captchaToken: token
+                      })}
+                      onExpire={() => setCommentForm({
+                        ...commentForm,
+                        captchaToken: ''
+                      })}
+                      onError={() => setCommentForm({
+                        ...commentForm,
+                        captchaToken: ''
+                      })}
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={commentLoading || !commentForm.captchaToken}
+                    className={styles.commentSubmitButton}
+                  >
+                    {commentLoading ? '投稿中...' : 'コメント投稿'}
+                  </button>
+                </form>
                 </div>
               ) : (
-                <>
-                  <h2 className={styles.detailTitle}>{selectedBunko.title}</h2>
-                  <div className={styles.detailAuthor}>作成者: {selectedBunko.author}</div>
-                  <div className={styles.detailText}>{selectedBunko.content}</div>
-                </>
-              )}
-              
-              {/* 連載の場合はいいね・コメント機能なし、単発投稿の場合のみ表示 */}
-              {!selectedBunko.isSeries && (
-                <>
-                  {/* いいねボタン */}
-                  <div className={styles.likeSection}>
-                    <button
-                      onClick={() => handleLike(selectedBunko.id)}
-                      className={`${styles.likeButton} ${likes.liked ? styles.liked : ''}`}
-                    >
-                      <span 
-                        style={{ 
-                          fontSize: '16px',
-                          position: 'relative',
-                          display: 'inline-block'
-                        }}
-                      >
-                        <span style={{
-                          color: '#333',
-                          fontSize: '16px'
-                        }}>♡</span>
-                        <span style={{
-                          position: 'absolute',
-                          top: '0',
-                          left: '0',
-                          color: likes.liked ? '#ff4757' : 'transparent',
-                          fontSize: '16px',
-                          transition: 'color 0.3s ease'
-                        }}>♥</span>
-                      </span>
-                      {likes.count}
-                    </button>
-                  </div>
-
-                  {/* コメントセクション */}
-                  {selectedBunko.comments_enabled ? (
-                    <div className={styles.commentSection}>
-                      <h3 style={{ marginBottom: '15px', fontSize: '1.1em' }}>
-                        コメント ({comments.length})
-                      </h3>
-                    
-                    {/* コメント一覧 */}
-                    {comments.length > 0 ? (
-                      <div style={{ marginBottom: '20px' }}>
-                        {comments.map((comment) => (
-                          <div key={comment.id} className={styles.commentItem}>
-                            <div className={styles.commentAuthor}>
-                              {comment.author}
-                            </div>
-                            <div className={styles.commentContent}>
-                              {comment.content}
-                            </div>
-                            <div className={styles.commentDate}>
-                              {new Date(comment.created_at).toLocaleString('ja-JP')}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className={styles.emptyComment}>
-                        まだコメントがありません
-                      </div>
-                    )}
-
-                    {/* コメント投稿フォーム */}
-                    <form onSubmit={handleCommentSubmit}>
-                      <div style={{ marginBottom: '12px' }}>
-                        <input
-                          type="text"
-                          placeholder="名前"
-                          value={commentForm.author}
-                          onChange={(e) => setCommentForm({
-                            ...commentForm,
-                            author: e.target.value
-                          })}
-                          className={styles.commentFormInput}
-                          maxLength={50}
-                          required
-                        />
-                      </div>
-                      <div style={{ marginBottom: '12px' }}>
-                        <textarea
-                          placeholder="コメントを入力..."
-                          value={commentForm.content}
-                          onChange={(e) => setCommentForm({
-                            ...commentForm,
-                            content: e.target.value
-                          })}
-                          className={styles.commentFormTextarea}
-                          maxLength={1000}
-                          required
-                        />
-                      </div>
-                      <div style={{ marginBottom: '12px' }}>
-                        <HCaptcha
-                          sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY || "10000000-ffff-ffff-ffff-000000000001"}
-                          theme={isDarkMode ? "dark" : "light"}
-                          onVerify={(token) => setCommentForm({
-                            ...commentForm,
-                            captchaToken: token
-                          })}
-                          onExpire={() => setCommentForm({
-                            ...commentForm,
-                            captchaToken: ''
-                          })}
-                          onError={() => setCommentForm({
-                            ...commentForm,
-                            captchaToken: ''
-                          })}
-                        />
-                      </div>
-                      <button
-                        type="submit"
-                        disabled={commentLoading || !commentForm.captchaToken}
-                        className={styles.commentSubmitButton}
-                      >
-                        {commentLoading ? '投稿中...' : 'コメント投稿'}
-                      </button>
-                    </form>
-                    </div>
-                  ) : (
-                    <div className={styles.disabledComments}>
-                      この投稿はコメントが無効になっています
-                    </div>
-                  )}
-                </>
+                <div className={styles.disabledComments}>
+                  この投稿はコメントが無効になっています
+                </div>
               )}
             </div>
           </div>
