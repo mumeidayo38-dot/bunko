@@ -71,6 +71,15 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
+:global(.dark-mode) .updateButton {
+  background: #3a3a3a;
+  color: white;
+}
+
+:global(.dark-mode) .updateButton:hover {
+  background: #4a4a4a;
+}
+
 .title {
   text-align: center;
   margin: 30px 0;
@@ -716,6 +725,310 @@
 
 :global(.dark-mode) .commentToggleSubtext {
   color: #aaa;
+}
+
+.adminButton {
+  padding: 8px 16px;
+  background-color: #666;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+  margin-right: 10px;
+}
+
+:global(.dark-mode) .adminButton {
+  background-color: #555;
+}
+
+.adminButtonPrimary {
+  padding: 8px 16px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+:global(.dark-mode) .adminButtonPrimary {
+  background-color: #3a3a3a;
+}
+
+.adminFormSection {
+  background-color: #f8f9fa;
+  padding: 30px;
+  border-radius: 8px;
+  margin-bottom: 40px;
+}
+
+:global(.dark-mode) .adminFormSection {
+  background-color: var(--card-bg-color);
+}
+
+.adminDeleteButton {
+  padding: 6px 12px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85em;
+  margin-left: 15px;
+}
+
+.adminDeleteButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+:global(.dark-mode) .adminDeleteButton {
+  background-color: #c82333;
+}
+
+.adminTabContainer {
+  display: flex;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.adminTab {
+  padding: 10px 20px;
+  background-color: transparent;
+  color: var(--text-color);
+  border: none;
+  border-radius: 5px 5px 0 0;
+  cursor: pointer;
+  margin-right: 5px;
+  transition: all 0.3s;
+}
+
+.adminTabActive {
+  background-color: #333;
+  color: white;
+}
+
+:global(.dark-mode) .adminTabActive {
+  background-color: #3a3a3a;
+}
+
+.adminStatsText {
+  margin-bottom: 1.5rem;
+  color: #666;
+}
+
+:global(.dark-mode) .adminStatsText {
+  color: #aaa;
+}
+
+.adminActionButtons {
+  display: flex;
+  gap: 5px;
+  flex-shrink: 0;
+  margin-left: 15px;
+}
+
+.adminToggleButton {
+  padding: 4px 8px;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.75em;
+}
+
+.adminBanButton {
+  padding: 4px 8px;
+  background-color: #ffc107;
+  color: black;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.75em;
+}
+
+.adminBanContainer {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+:global(.dark-mode) .adminBanContainer {
+  background-color: var(--card-bg-color);
+}
+
+.adminBanForm {
+  display: flex;
+  gap: 10px;
+  align-items: end;
+}
+
+.adminBanFormField {
+  flex: 1;
+}
+
+.adminBanFormFieldWide {
+  flex: 2;
+}
+
+.adminBanFormLabel {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.9em;
+  color: var(--text-color);
+}
+
+.adminBanFormInput {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+
+.adminBanFormSelect {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+
+.adminBanItem {
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  padding: 15px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+:global(.dark-mode) .adminBanItem {
+  background-color: #3d3d00;
+  border: 1px solid #666600;
+}
+
+.adminBanItemInfo {
+  flex: 1;
+}
+
+.adminBanItemIP {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: var(--text-color);
+}
+
+.adminBanItemReason {
+  font-size: 0.9em;
+  color: #666;
+  margin-bottom: 3px;
+}
+
+:global(.dark-mode) .adminBanItemReason {
+  color: #aaa;
+}
+
+.adminBanItemDate {
+  font-size: 0.8em;
+  color: #999;
+}
+
+:global(.dark-mode) .adminBanItemDate {
+  color: #888;
+}
+
+.adminFilterContainer {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+:global(.dark-mode) .adminFilterContainer {
+  background-color: var(--card-bg-color);
+}
+
+.adminFilterForm {
+  display: flex;
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 15px;
+}
+
+.adminFilterResults {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+}
+
+:global(.dark-mode) .adminFilterResults {
+  background-color: #3d3d00;
+  border: 1px solid #666600;
+}
+
+.adminSearchResultItem {
+  background-color: #fff5f5;
+  border: 1px solid #f5c6cb;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+:global(.dark-mode) .adminSearchResultItem {
+  background-color: #400000;
+  border: 1px solid #660000;
+}
+
+.adminEmptyState {
+  text-align: center;
+  color: #666;
+  padding: 20px;
+}
+
+:global(.dark-mode) .adminEmptyState {
+  color: #aaa;
+}
+
+.adminPrimaryButton {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+:global(.dark-mode) .adminPrimaryButton {
+  background-color: #0056b3;
+}
+
+.adminPrimaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.adminUnbanButton {
+  padding: 6px 12px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85em;
+}
+
+:global(.dark-mode) .adminUnbanButton {
+  background-color: #1e7e34;
 }
 
 /* レスポンシブ対応 */
