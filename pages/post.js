@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
@@ -14,7 +14,27 @@ export default function Post() {
     commentsEnabled: true
   });
   const [captchaToken, setCaptchaToken] = useState('');
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+    setIsDarkMode(savedDarkMode);
+    if (savedDarkMode) {
+      document.documentElement.classList.add('dark-mode');
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    localStorage.setItem('darkMode', newDarkMode.toString());
+    if (newDarkMode) {
+      document.documentElement.classList.add('dark-mode');
+    } else {
+      document.documentElement.classList.remove('dark-mode');
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -96,6 +116,13 @@ export default function Post() {
         <title>投稿 - おぜう文庫 web</title>
       </Head>
       <div className={styles.container}>
+        <button 
+          className={styles.darkModeToggle}
+          onClick={toggleDarkMode}
+          aria-label={isDarkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
+        >
+{isDarkMode ? '☀' : '☾'}
+        </button>
         <h1 className={styles.title}>投稿</h1>
         
         <nav className={styles.nav}>
@@ -148,35 +175,19 @@ export default function Post() {
             
             <div className={styles.formGroup}>
               <div className={styles.commentToggleWrapper}>
-                <label style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  cursor: 'pointer',
-                  padding: '12px',
-                  border: '2px solid #e0e0e0',
-                  borderRadius: '8px',
-                  backgroundColor: '#f9f9f9'
-                }}>
-                  <div style={{
-                    position: 'relative',
-                    width: '50px',
-                    height: '28px',
-                    backgroundColor: formData.commentsEnabled ? '#4a90e2' : '#ccc',
-                    borderRadius: '14px',
-                    transition: 'background-color 0.3s',
-                    marginRight: '12px'
-                  }}>
-                    <div style={{
-                      position: 'absolute',
-                      top: '2px',
-                      left: formData.commentsEnabled ? '24px' : '2px',
-                      width: '24px',
-                      height: '24px',
-                      backgroundColor: 'white',
-                      borderRadius: '50%',
-                      transition: 'left 0.3s',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                    }}></div>
+                <label className={styles.commentToggleLabel}>
+                  <div 
+                    className={styles.commentToggleSwitch}
+                    style={{
+                      backgroundColor: formData.commentsEnabled ? '#4a90e2' : '#ccc'
+                    }}
+                  >
+                    <div 
+                      className={styles.commentToggleSlider}
+                      style={{
+                        left: formData.commentsEnabled ? '24px' : '2px'
+                      }}
+                    ></div>
                   </div>
                   <input
                     type="checkbox"
@@ -186,10 +197,10 @@ export default function Post() {
                     style={{ display: 'none' }}
                   />
                   <div>
-                    <div style={{ fontWeight: '500', color: '#333' }}>
+                    <div className={styles.commentToggleText}>
                       コメント機能
                     </div>
-                    <div style={{ fontSize: '0.85em', color: '#666', marginTop: '2px' }}>
+                    <div className={styles.commentToggleSubtext}>
                       {formData.commentsEnabled ? 
                         '読者がコメントを投稿できます' : 
                         'コメント投稿は無効になります'
@@ -204,6 +215,7 @@ export default function Post() {
               <label>認証</label>
               <HCaptcha
                 sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY || "10000000-ffff-ffff-ffff-000000000001"}
+                theme={isDarkMode ? "dark" : "light"}
                 onVerify={(token) => setCaptchaToken(token)}
                 onExpire={() => setCaptchaToken('')}
                 onError={() => setCaptchaToken('')}
