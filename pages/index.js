@@ -172,10 +172,46 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>おぜう文庫 web</title>
-        <meta name="description" content="おぜう文庫 web" />
+        <title>おぜう文庫(ozeu文庫)</title>
+        <meta name="description" content="おぜうの集いの文庫集、狂ってる文集がたくさん！" />
+        <meta name="keywords" content="おぜう,おぜう文庫,ozeu,ozeu文庫,ozeu bunko,文庫,小説,詩,エッセイ,文学,投稿,共有,コミュニティ,読書,novel,poetry,essay,literature" />
+        <meta name="author" content="おぜう文庫" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://ozeu-bunko.vercel.app/" />
+        <meta property="og:title" content="おぜう文庫(ozeu文庫)" />
+        <meta property="og:description" content="おぜうの集いの文庫集、狂ってる文集がたくさん！" />
+        <meta property="og:site_name" content="おぜう文庫" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="おぜう文庫(ozeu文庫)" />
+        <meta name="twitter:description" content="おぜうの集いの文庫集、狂ってる文集がたくさん！" />
+        
+        {/* 構造化データ */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "おぜう文庫",
+              "alternateName": ["おぜう文庫 web", "ozeu bunko", "ozeu文庫"],
+              "url": "https://ozeu-bunko.vercel.app/",
+              "description": "おぜうの集いの文庫集、狂ってる文集がたくさん！",
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://ozeu-bunko.vercel.app/?search={search_term_string}",
+                "query-input": "required name=search_term_string"
+              }
+            })
+          }}
+        />
+        
         <link rel="icon" href="/favicon.ico" />
+        <link rel="canonical" href="https://ozeu-bunko.vercel.app/" />
       </Head>
       
       <div className={styles.container}>
