@@ -4,6 +4,42 @@
   padding: 20px;
   font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   min-height: 100vh;
+  position: relative;
+}
+
+.darkModeToggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #333;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 1.2em;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.darkModeToggle:hover {
+  background: #555;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+:global(.dark-mode) .darkModeToggle {
+  background: #3a3a3a;
+  color: white;
+}
+
+:global(.dark-mode) .darkModeToggle:hover {
+  background: #4a4a4a;
 }
 
 .header {
@@ -40,15 +76,15 @@
   font-size: 2em;
   font-weight: 300;
   letter-spacing: 0.1em;
-  color: #333;
+  color: var(--text-color);
 }
 
 .nav {
   text-align: center;
   margin: 30px 0;
   padding: 20px 0;
-  border-top: 1px solid #e0e0e0;
-  border-bottom: 1px solid #e0e0e0;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .nav a {
@@ -65,9 +101,17 @@
   color: #000;
 }
 
+:global(.dark-mode) .nav a:hover {
+  color: #fff;
+}
+
 .nav a.active {
   color: #000;
   font-weight: bold;
+}
+
+:global(.dark-mode) .nav a.active {
+  color: #fff;
 }
 
 .searchContainer {
@@ -79,13 +123,14 @@
   width: 100%;
   max-width: 400px;
   padding: 12px 20px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--border-color);
   border-radius: 25px;
   font-size: 1em;
   font-family: inherit;
   transition: all 0.3s;
-  background: white;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  background: var(--bg-color);
+  color: var(--text-color);
+  box-shadow: 0 2px 10px var(--shadow-color);
 }
 
 .searchInput:focus {
@@ -121,6 +166,10 @@
   font-size: 1.1em;
 }
 
+:global(.dark-mode) .loading {
+  color: #aaa;
+}
+
 .emptyState {
   text-align: center;
   padding: 60px 20px;
@@ -128,12 +177,16 @@
   font-size: 1.1em;
 }
 
+:global(.dark-mode) .emptyState {
+  color: #bbb;
+}
+
 .bunkoList {
   margin-top: 40px;
 }
 
 .bunkoItem {
-  background: #fafafa;
+  background: var(--card-bg-color);
   padding: 25px;
   margin-bottom: 20px;
   border-radius: 8px;
@@ -143,17 +196,17 @@
 }
 
 .bunkoItem:hover {
-  background: #f5f5f5;
+  background: var(--card-hover-bg-color);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  border-color: #e0e0e0;
+  box-shadow: 0 4px 12px var(--shadow-color);
+  border-color: var(--border-color);
 }
 
 .bunkoTitle {
   font-size: 1.3em;
   margin-bottom: 8px;
   font-weight: 500;
-  color: #333;
+  color: var(--text-color);
   line-height: 1.4;
 }
 
@@ -161,6 +214,10 @@
   color: #666;
   font-size: 0.95em;
   margin-bottom: 10px;
+}
+
+:global(.dark-mode) .bunkoAuthor {
+  color: #aaa;
 }
 
 .bunkoPreview {
@@ -174,10 +231,18 @@
   -webkit-box-orient: vertical;
 }
 
+:global(.dark-mode) .bunkoPreview {
+  color: #bbb;
+}
+
 .bunkoDate {
   color: #aaa;
   font-size: 0.85em;
   margin-top: 10px;
+}
+
+:global(.dark-mode) .bunkoDate {
+  color: #999;
 }
 
 .formGroup {
@@ -192,16 +257,21 @@
   font-size: 0.95em;
 }
 
+:global(.dark-mode) .formGroup label {
+  color: #ccc;
+}
+
 .formGroup input,
 .formGroup textarea {
   width: 100%;
   padding: 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 5px;
   font-size: 1em;
   font-family: inherit;
   transition: border-color 0.3s;
-  background: white;
+  background: var(--bg-color);
+  color: var(--text-color);
 }
 
 .formGroup input:focus,
@@ -236,6 +306,15 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+:global(.dark-mode) .submitBtn {
+  background: #3a3a3a;
+  color: white;
+}
+
+:global(.dark-mode) .submitBtn:hover {
+  background: #4a4a4a;
+}
+
 .submitBtn:active {
   transform: translateY(0);
 }
@@ -245,6 +324,11 @@
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+}
+
+:global(.dark-mode) .submitBtn:disabled {
+  background: #333;
+  color: #777;
 }
 
 .message {
@@ -285,7 +369,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--overlay-bg);
   backdrop-filter: blur(4px);
   z-index: 1000;
   justify-content: center;
@@ -294,7 +378,7 @@
 }
 
 .detailContent {
-  background: white;
+  background: var(--bg-color);
   width: 90%;
   max-width: 700px;
   max-height: 85vh;
@@ -302,7 +386,7 @@
   border-radius: 10px;
   overflow-y: auto;
   position: relative;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.3s ease-out;
 }
 
@@ -342,23 +426,23 @@
 .detailTitle {
   font-size: 1.8em;
   margin-bottom: 10px;
-  color: #333;
+  color: var(--text-color);
   line-height: 1.4;
   padding-right: 40px;
 }
 
 .detailAuthor {
-  color: #666;
+  color: #888;
   margin-bottom: 20px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color);
   font-size: 1em;
 }
 
 .detailText {
   line-height: 2;
   white-space: pre-wrap;
-  color: #333;
+  color: var(--text-color);
   font-size: 1em;
 }
 
@@ -367,12 +451,12 @@
 }
 
 .updateItem {
-  background: #f8f9fa;
+  background: var(--card-bg-color);
   padding: 20px;
   margin-bottom: 15px;
   border-radius: 8px;
-  border-left: 4px solid #333;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid var(--text-color);
+  box-shadow: 0 2px 4px var(--shadow-color);
 }
 
 .updateDate {
@@ -382,11 +466,15 @@
   font-weight: 500;
 }
 
+:global(.dark-mode) .updateDate {
+  color: #aaa;
+}
+
 .updateTitle {
   font-size: 1.2em;
   font-weight: 600;
   margin-bottom: 10px;
-  color: #333;
+  color: var(--text-color);
 }
 
 .updateContent {
@@ -394,6 +482,239 @@
   line-height: 1.6;
   white-space: pre-wrap;
   font-size: 0.95em;
+}
+
+:global(.dark-mode) .updateContent {
+  color: #ccc;
+}
+
+.likeSection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+:global(.dark-mode) .likeSection {
+  border-top: 1px solid var(--border-color);
+}
+
+.likeButton {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 16px;
+  background-color: #f1f2f6;
+  color: #2c3e50;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.likeButton.liked {
+  background-color: #ff4757;
+  color: white;
+}
+
+:global(.dark-mode) .likeButton {
+  background-color: #555;
+  color: #ddd;
+}
+
+:global(.dark-mode) .likeButton.liked {
+  background-color: #ff4757;
+  color: white;
+}
+
+.commentSection {
+  margin-top: 30px;
+}
+
+.commentItem {
+  background-color: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+:global(.dark-mode) .commentItem {
+  background-color: #444;
+}
+
+.commentAuthor {
+  font-weight: 500;
+  font-size: 0.9em;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+:global(.dark-mode) .commentAuthor {
+  color: #ddd;
+}
+
+.commentContent {
+  white-space: pre-wrap;
+  font-size: 0.9em;
+  line-height: 1.4;
+  color: #333;
+}
+
+:global(.dark-mode) .commentContent {
+  color: #ddd;
+}
+
+.commentDate {
+  font-size: 0.8em;
+  color: #666;
+  margin-top: 8px;
+}
+
+:global(.dark-mode) .commentDate {
+  color: #aaa;
+}
+
+.commentFormInput {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9em;
+  background: white;
+  color: #333;
+}
+
+:global(.dark-mode) .commentFormInput {
+  background: var(--bg-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.commentFormTextarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9em;
+  min-height: 80px;
+  resize: vertical;
+  background: white;
+  color: #333;
+}
+
+:global(.dark-mode) .commentFormTextarea {
+  background: var(--bg-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.commentSubmitButton {
+  padding: 8px 16px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.commentSubmitButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+:global(.dark-mode) .commentSubmitButton {
+  background-color: #3a3a3a;
+  color: white;
+}
+
+:global(.dark-mode) .commentSubmitButton:disabled {
+  background-color: #333;
+  color: #777;
+}
+
+.emptyComment {
+  text-align: center;
+  color: #666;
+  font-size: 0.9em;
+  margin: 20px 0;
+}
+
+:global(.dark-mode) .emptyComment {
+  color: #aaa;
+}
+
+.disabledComments {
+  margin-top: 30px;
+  text-align: center;
+  color: #666;
+  font-size: 0.9em;
+  padding: 20px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+:global(.dark-mode) .disabledComments {
+  background-color: #444;
+  color: #aaa;
+}
+
+.commentToggleLabel {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+:global(.dark-mode) .commentToggleLabel {
+  border: 2px solid var(--border-color);
+  background-color: var(--card-bg-color);
+}
+
+.commentToggleSwitch {
+  position: relative;
+  width: 50px;
+  height: 28px;
+  border-radius: 14px;
+  transition: background-color 0.3s;
+  margin-right: 12px;
+}
+
+.commentToggleSlider {
+  position: absolute;
+  top: 2px;
+  width: 24px;
+  height: 24px;
+  background-color: white;
+  border-radius: 50%;
+  transition: left 0.3s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.commentToggleText {
+  font-weight: 500;
+  color: #333;
+}
+
+:global(.dark-mode) .commentToggleText {
+  color: var(--text-color);
+}
+
+.commentToggleSubtext {
+  font-size: 0.85em;
+  color: #666;
+  margin-top: 2px;
+}
+
+:global(.dark-mode) .commentToggleSubtext {
+  color: #aaa;
 }
 
 /* レスポンシブ対応 */
