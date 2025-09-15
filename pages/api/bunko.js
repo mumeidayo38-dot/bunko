@@ -48,6 +48,13 @@ export default async function handler(req, res) {
       // カラムが既に存在する場合のエラーは無視
     }
 
+    // 連載タグ用のカラムを追加
+    try {
+      await sql`ALTER TABLE bunko ADD COLUMN IF NOT EXISTS series_tag_id INTEGER`;
+    } catch (e) {
+      // カラムが既に存在する場合のエラーは無視
+    }
+
     // BANユーザーテーブル作成
     await sql`
       CREATE TABLE IF NOT EXISTS banned_users (
@@ -75,7 +82,7 @@ export default async function handler(req, res) {
         headers: req.headers,
         contentType: req.headers['content-type']
       });
-      const { title, author, content, captchaToken, commentsEnabled } = req.body;
+      const { title, author, content, captchaToken, commentsEnabled, seriesTagId } = req.body;
       const ip = getClientIP(req);
 
       // BANチェック
@@ -169,8 +176,8 @@ export default async function handler(req, res) {
       console.log('Attempting database insert...');
       try {
         const { rows } = await sql`
-          INSERT INTO bunko (title, author, content, ip_address, comments_enabled)
-          VALUES (${title.trim()}, ${author.trim()}, ${content.trim()}, ${ip}, ${commentsEnabled !== false})
+          INSERT INTO bunko (title, author, content, ip_address, comments_enabled, series_tag_id)
+          VALUES (${title.trim()}, ${author.trim()}, ${content.trim()}, ${ip}, ${commentsEnabled !== false}, ${seriesTagId || null})
           RETURNING *
         `;
         
