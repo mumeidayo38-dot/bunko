@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Allow: /post
+Allow: /updates
+
+# 管理者ページは検索エンジンからブロック
+Disallow: /admin/
+Disallow: /api/
+
+# サイトマップの場所
+Sitemap: https://bunko.ozetudo.blog/sitemap.xml
+
+# 検索エンジンに対する追加指示
+Crawl-delay: 1
